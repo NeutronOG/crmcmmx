@@ -1,0 +1,14 @@
+Módulo,Página,Ruta,Descripción,Flujo Relacionado,Entrada de Datos,Salida de Datos,Sincronización Excel
+Dashboard,Panel Principal,/,Vista general con estadísticas y actividad reciente,Centro de control,Datos de todos los módulos,Resumen ejecutivo,No
+Nuevo Negocio,Oportunidades,/nuevo-negocio,Gestión de oportunidades de negocio y branding,Lead → Oportunidad → Cotización,Leads calificados,Cotizaciones,Pendiente
+Nuevo Negocio,Cotizaciones,/cotizaciones,Cotizaciones y seguimiento de propuestas,Oportunidad → Cotización → Proyecto,Oportunidades,Proyectos aprobados,Pendiente
+Nuevo Negocio,Leads,/leads,Captura y calificación de prospectos,Prospecto → Lead → Oportunidad,Prospectos nuevos,Oportunidades calificadas,Pendiente
+Clientes,Gestión de Clientes,/clients,Base de datos de clientes activos - EXPORTAR/IMPORTAR EXCEL,Proyecto cerrado → Cliente,Proyectos completados + Excel,Historial de cliente + Excel,✅ ACTIVO
+Producción,Proyectos,/projects,Gestión de proyectos activos,Cotización aprobada → Proyecto,Cotizaciones aprobadas,Entregables,Pendiente
+Producción,Productos/Diseño,/productos,Diseño gráfico y pantallas de producto,Proyecto → Producto → Entrega,Briefs de proyecto,Assets y entregables,Pendiente
+Producción,Creadores de Contenido,/creadores,Gestión de creadores y calidad,Proyecto → Asignación → Contenido,Proyectos asignados,Contenido creado,Pendiente
+Producción,Responsables,/responsables,Asignación y seguimiento de responsables,Proyecto → Responsable → Tarea,Proyectos activos,Tareas completadas,Pendiente
+Finanzas,Facturación,/invoices,Gestión de facturas y pagos,Proyecto → Factura → Cobro,Proyectos entregados,Ingresos,Pendiente
+Finanzas,Nómina y Porcentajes,/nomina,Pagos y comisiones del equipo,Proyecto → Comisión → Pago,Proyectos facturados,Pagos a equipo,Pendiente
+Comunicación,Comunicaciones,/communications,Historial de comunicaciones con clientes,Cliente ↔ Comunicación,Interacciones,Seguimiento,No
+Reportes,Reportes,/reports,Análisis y reportes del negocio,Todos los módulos → Reporte,Datos históricos,Insights y métricas,No
