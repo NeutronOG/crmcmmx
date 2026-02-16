@@ -5,18 +5,10 @@
 
 -- USUARIOS
 INSERT INTO usuarios (nombre, email, rol) VALUES
-  ('Neyda', 'neyda@centralmarketing.mx', 'admin'),
-  ('María Torres', 'maria@centralmarketing.com', 'diseñador_grafico'),
-  ('Pedro Ruiz', 'pedro@centralmarketing.com', 'diseñador_industrial'),
-  ('Diego Martínez', 'diego@centralmarketing.com', 'produccion_audiovisual'),
-  ('Laura Gómez', 'laura@centralmarketing.com', 'produccion_activaciones'),
-  ('Ana García', 'ana@centralmarketing.com', 'marketing_digital'),
-  ('Carlos López', 'carlos@centralmarketing.com', 'auxiliar_marketing'),
-  ('Sofía Hernández', 'sofia@centralmarketing.com', 'creador_contenido'),
-  ('Roberto Sánchez', 'roberto@centralmarketing.com', 'creador_parrilla'),
-  ('Patricia Flores', 'patricia@centralmarketing.com', 'administracion'),
-  ('Influencer Demo', 'influencer@centralmarketing.com', 'influencer'),
-  ('Freelancer Demo', 'freelancer@centralmarketing.com', 'freelancer');
+  ('Guillermo', 'guillermo@centralmarketing.mx', 'admin'),
+  ('Ian', 'ian@centralmarketing.mx', 'admin'),
+  ('Neyda', 'neyda@centralmarketing.mx', 'administracion'),
+  ('Felipe', 'felipe@centralmarketing.mx', 'tareas');
 
 -- CLIENTES
 INSERT INTO clientes (codigo, nombre, empresa, email, telefono, estado, etapa_onboarding, valor_mensual, fecha_inicio, ultimo_contacto, responsable, notas) VALUES

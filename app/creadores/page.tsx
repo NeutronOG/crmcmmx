@@ -49,7 +49,7 @@ export default function CreadoresPage() {
         <main className="container mx-auto p-6 space-y-8 pb-20">
           <div className="flex items-start justify-between pt-6">
             <div className="space-y-3">
-              <h1 className="text-5xl font-bold tracking-tight text-balance text-white">
+              <h1 className="text-5xl font-bold tracking-tight text-balance text-foreground">
                 Creadores de Contenido
               </h1>
               <p className="text-lg text-muted-foreground/90">

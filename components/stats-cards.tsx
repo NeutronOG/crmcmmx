@@ -4,8 +4,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Users, Briefcase, TrendingUp, DollarSign } from "lucide-react"
 import { useEffect, useState } from "react"
 import { getClientes, getProyectos, getLeads, getIngresos } from "@/lib/store"
+import { useAuth } from "@/components/auth-provider"
 
 export function StatsCards() {
+  const { isAdmin } = useAuth()
   const [mounted, setMounted] = useState(false)
   const [data, setData] = useState({ clientes: 0, proyectos: 0, conversion: 0, ingresos: 0 })
 
@@ -22,7 +24,7 @@ export function StatsCards() {
     })
   }, [])
 
-  const stats = [
+  const baseStats = [
     {
       label: "Total Clientes",
       value: data.clientes.toString(),
@@ -47,6 +49,11 @@ export function StatsCards() {
       positive: true,
       gradient: "from-[oklch(0.78_0.10_85)] to-[oklch(0.78_0.10_85_/_0.3)]",
     },
+  ]
+
+  // Only show financial data to admins
+  const stats = isAdmin ? [
+    ...baseStats,
     {
       label: "Ingresos del Mes",
       value: `$${data.ingresos.toLocaleString()}`,
@@ -55,10 +62,10 @@ export function StatsCards() {
       positive: true,
       gradient: "from-[oklch(0.72_0.10_155)] to-[oklch(0.72_0.10_155_/_0.3)]",
     },
-  ]
+  ] : baseStats
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className={`grid gap-6 md:grid-cols-2 ${isAdmin ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
       {stats.map((stat, index) => {
         const Icon = stat.icon
         return (
@@ -74,8 +81,8 @@ export function StatsCards() {
             <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between space-x-4">
                 <div className="space-y-2 flex-1">
-                  <p className="text-sm font-medium text-white/50">{stat.label}</p>
-                  <p className="text-3xl font-bold tracking-tight text-white">{stat.value}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                  <p className="text-3xl font-bold tracking-tight text-foreground">{stat.value}</p>
                   <div className="flex items-center gap-2">
                     <span
                       className={`text-xs font-semibold px-2 py-1 rounded-full ${
@@ -86,13 +93,13 @@ export function StatsCards() {
                     >
                       {stat.change}
                     </span>
-                    <span className="text-xs text-white/30">este mes</span>
+                    <span className="text-xs text-muted-foreground/60">este mes</span>
                   </div>
                 </div>
                 <div
                   className={`size-16 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg shadow-black/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-white/10`}
                 >
-                  <Icon className="size-8 text-white drop-shadow-lg" />
+                  <Icon className="size-8 text-white dark:text-white drop-shadow-lg" />
                 </div>
               </div>
             </CardContent>

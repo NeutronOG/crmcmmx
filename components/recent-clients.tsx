@@ -47,12 +47,12 @@ export function RecentClients() {
                 <Avatar
                   className={`${client.color} size-12 ring-2 ring-white/20 group-hover:ring-white/40 group-hover:scale-110 transition-all duration-300 shadow-lg`}
                 >
-                  <AvatarFallback className="text-white font-bold text-sm bg-transparent">
+                  <AvatarFallback className="text-white dark:text-white font-bold text-sm bg-transparent">
                     {client.initials}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-semibold leading-none text-white group-hover:text-white/80 transition-colors duration-300">
+                  <p className="font-semibold leading-none text-foreground group-hover:text-foreground/80 transition-colors duration-300">
                     {client.name}
                   </p>
                   <p className="text-sm text-muted-foreground/80 mt-1.5">{client.contact}</p>
@@ -65,7 +65,7 @@ export function RecentClients() {
                     ? "satin-green-bg satin-green border satin-green-border"
                     : client.status === "Prospecto"
                     ? "satin-yellow-bg satin-yellow border satin-yellow-border"
-                    : "bg-white/10 border border-white/10 text-white/50"
+                    : "bg-muted border border-border text-muted-foreground"
                 }`}
               >
                 {client.status}

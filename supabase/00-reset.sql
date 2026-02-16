@@ -23,5 +23,7 @@ TRUNCATE usuarios CASCADE;
 
 -- Re-insertar usuarios base
 INSERT INTO usuarios (nombre, email, rol) VALUES
-  ('Neyda', 'neyda@centralmarketing.mx', 'admin'),
-  ('Guillermo', 'guillermo@centralmarketing.mx', 'dueno');
+  ('Guillermo', 'guillermo@centralmarketing.mx', 'admin'),
+  ('Ian', 'ian@centralmarketing.mx', 'admin'),
+  ('Neyda', 'neyda@centralmarketing.mx', 'administracion'),
+  ('Felipe', 'felipe@centralmarketing.mx', 'tareas');

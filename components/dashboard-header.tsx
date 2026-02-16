@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Users, Briefcase, Target, DollarSign, Sparkles, FileText, Palette, Video, Percent, UserCheck, ChevronDown, ChevronRight, ClipboardCheck, LogOut, Lightbulb, Calendar, Menu, X, LayoutDashboard, BarChart3 } from "lucide-react"
 import { NotificacionesBell } from "@/components/notificaciones/notificaciones-bell"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { useTheme } from "next-themes"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
@@ -24,6 +26,7 @@ type NavItem = {
 export function DashboardHeader() {
   const { usuario, logout, tieneAcceso } = useAuth()
   const pathname = usePathname()
+  const { theme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null)
   const navRef = useRef<HTMLDivElement>(null)
@@ -108,8 +111,15 @@ export function DashboardHeader() {
           <div className="flex items-center justify-between h-14 px-4">
             {/* Left: Logo */}
             <Link href="/" className="flex items-center gap-2.5 shrink-0">
-              <Image src="/logo.jpg" alt="Central Marketing" width={140} height={32} className="h-6 w-auto hidden sm:block" priority />
-              <span className="sm:hidden text-white font-bold text-sm">CM</span>
+              <Image 
+                src={theme === "light" ? "/LOGOTIPO_CMMX_DARK.png" : "/Diseño sin título (20).png"} 
+                alt="Central Marketing" 
+                width={180} 
+                height={40} 
+                className="h-8 w-auto hidden sm:block" 
+                priority 
+              />
+              <span className="sm:hidden font-bold text-sm text-foreground">CM</span>
             </Link>
 
             {/* Center: Desktop nav */}
@@ -120,8 +130,8 @@ export function DashboardHeader() {
                     <Link key={item.label} href={item.href}>
                       <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 ${
                         isActive(item.href)
-                          ? "bg-white/10 text-white"
-                          : "text-white/50 hover:text-white hover:bg-white/5"
+                          ? "bg-primary/10 text-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                       }`}>
                         {item.icon}
                         <span>{item.label}</span>
@@ -141,8 +151,8 @@ export function DashboardHeader() {
                         onClick={() => toggleGroup(item.label)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 ${
                           isGroupActive
-                            ? "bg-white/10 text-white"
-                            : "text-white/50 hover:text-white hover:bg-white/5"
+                            ? "bg-primary/10 text-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                         }`}
                       >
                         {item.icon}
@@ -152,13 +162,13 @@ export function DashboardHeader() {
 
                       {/* Dropdown */}
                       {isExpanded && (
-                        <div className="absolute top-full left-0 mt-2 py-1.5 min-w-[180px] bg-[#1a1a1a] border border-white/10 rounded-xl shadow-xl shadow-black/30 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                        <div className="absolute top-full left-0 mt-2 py-1.5 min-w-[180px] bg-popover border border-border rounded-xl shadow-xl shadow-black/30 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                           {visibleChildren.map((child) => (
                             <Link key={child.href} href={child.href} onClick={() => setExpandedGroup(null)}>
                               <div className={`flex items-center gap-2.5 px-3 py-2 mx-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                                 pathname === child.href
-                                  ? "bg-white/10 text-white"
-                                  : "text-white/50 hover:text-white hover:bg-white/5"
+                                  ? "bg-primary/10 text-foreground"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                               }`}>
                                 {child.icon}
                                 {child.label}
@@ -177,6 +187,7 @@ export function DashboardHeader() {
 
             {/* Right: Actions */}
             <div className="flex items-center gap-1.5 shrink-0">
+              <ThemeToggle />
               <NotificacionesBell />
 
               {/* Avatar dropdown */}

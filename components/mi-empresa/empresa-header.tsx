@@ -7,9 +7,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { LogOut, Star } from "lucide-react"
 import { NotificacionesBell } from "@/components/notificaciones/notificaciones-bell"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { useTheme } from "next-themes"
 
 export function EmpresaHeader() {
   const { usuario, logout } = useAuth()
+  const { theme } = useTheme()
 
   const initials = usuario?.nombre
     ? usuario.nombre.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()
@@ -20,7 +23,14 @@ export function EmpresaHeader() {
       <div className="container mx-auto flex h-16 items-center justify-between px-6">
         <div className="flex items-center gap-4">
           <Link href="/mi-empresa" className="flex items-center gap-3">
-            <Image src="/logo.jpg" alt="Central Marketing" width={140} height={32} className="h-6 w-auto" priority />
+            <Image 
+              src={theme === "light" ? "/LOGOTIPO_CMMX_DARK.png" : "/Diseño sin título (20).png"} 
+              alt="Central Marketing" 
+              width={180} 
+              height={40} 
+              className="h-8 w-auto" 
+              priority 
+            />
           </Link>
           <span className="text-xs text-muted-foreground border-l border-white/10 pl-4">Panel Ejecutivo</span>
           <Link href="/creadores" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors ml-4">
@@ -30,6 +40,7 @@ export function EmpresaHeader() {
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <NotificacionesBell />
           <div className="flex items-center gap-3 pl-3 border-l border-white/10">
             <div className="text-right hidden sm:block">

@@ -14,10 +14,10 @@ export default function DashboardPage() {
         <DashboardHeader />
         <main className="container mx-auto p-6 space-y-8 pb-20">
           <div className="space-y-3 pt-6">
-            <h1 className="text-5xl font-bold tracking-tight text-white">
+            <h1 className="text-5xl font-bold tracking-tight text-foreground">
               Panel de Control
             </h1>
-            <p className="text-lg text-white/50">Vista general de Central Marketing</p>
+            <p className="text-lg text-muted-foreground">Vista general de Central Marketing</p>
           </div>
 
           <StatsCards />

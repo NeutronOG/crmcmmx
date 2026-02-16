@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react"
 import type { Usuario, Rol, Seccion } from "@/lib/auth"
-import { getUsuarioActual, login as authLogin, logout as authLogout, tienePermiso, getSeccionesPermitidas } from "@/lib/auth"
+import { getUsuarioActual, login as authLogin, logout as authLogout, tienePermiso, getSeccionesPermitidas, getUsuarios } from "@/lib/auth"
 
 interface AuthContextType {
   usuario: Usuario | null
@@ -30,9 +30,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const loadUser = useCallback(() => {
+  const loadUser = useCallback(async () => {
     const user = getUsuarioActual()
-    setUsuario(user)
+    if (user) {
+      // Validate user still exists in database with same role
+      const dbUsers = await getUsuarios()
+      const dbUser = dbUsers.find(u => u.id === user.id || u.email === user.email)
+      if (!dbUser) {
+        // User no longer exists in database, force logout
+        authLogout()
+        setUsuario(null)
+        setLoading(false)
+        return
+      }
+      // Update user with current role from database
+      setUsuario({ ...user, rol: dbUser.rol })
+    } else {
+      setUsuario(null)
+    }
     setLoading(false)
   }, [])
 

@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
 import Image from "next/image"
 import { LiquidBackground } from "@/components/liquid-background"
+import { useAuth } from "@/components/auth-provider"
+import { useTheme } from "next-themes"
 import { getUsuarios, rolesLabels } from "@/lib/auth"
 import type { Usuario } from "@/lib/auth"
 
@@ -17,6 +19,7 @@ interface LoginScreenProps {
 }
 
 export function LoginScreen({ onLogin }: LoginScreenProps) {
+  const { theme } = useTheme()
   const [busqueda, setBusqueda] = useState("")
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [loading, setLoading] = useState(true)
@@ -51,7 +54,14 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
       <div className="relative z-10 w-full max-w-2xl space-y-8">
         <div className="text-center space-y-4">
-          <Image src="/logo.jpg" alt="Central Marketing" width={600} height={150} className="h-40 sm:h-48 w-auto mx-auto" priority />
+          <Image 
+            src={theme === "light" ? "/LOGOTIPO_CMMX_DARK.png" : "/Diseño sin título (20).png"} 
+            alt="Central Marketing" 
+            width={600} 
+            height={150} 
+            className="h-32 sm:h-40 w-auto mx-auto" 
+            priority 
+          />
           <p className="text-white/50">Selecciona tu perfil para ingresar al sistema</p>
         </div>
 

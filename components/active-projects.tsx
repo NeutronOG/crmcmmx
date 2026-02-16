@@ -61,7 +61,7 @@ export function ActiveProjects() {
             >
               <div className="flex items-start justify-between">
                 <div className="space-y-1.5">
-                  <p className="font-semibold leading-none text-white group-hover:text-white/80 transition-colors duration-300">
+                  <p className="font-semibold leading-none text-foreground group-hover:text-foreground/80 transition-colors duration-300">
                     {project.name}
                   </p>
                   <p className="text-sm text-muted-foreground/80">{project.client}</p>
@@ -77,7 +77,7 @@ export function ActiveProjects() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground/80">{project.status}</span>
-                  <span className="font-bold text-white">{project.progress}%</span>
+                  <span className="font-bold text-foreground">{project.progress}%</span>
                 </div>
                 <div className="relative h-3 rounded-full glass-subtle overflow-hidden">
                   <div

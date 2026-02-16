@@ -75,10 +75,10 @@ export default function MiPanelPage() {
         <main className="container mx-auto p-4 sm:p-6 pb-20">
           {/* Welcome */}
           <div className="space-y-2 pt-4 sm:pt-6 mb-6">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
               Hola, {usuario?.nombre?.split(" ")[0]}
             </h1>
-            <p className="text-white/50">Tu espacio de trabajo en Central Marketing</p>
+            <p className="text-muted-foreground">Tu espacio de trabajo en Central Marketing</p>
           </div>
 
           {/* Navigation tabs */}
@@ -89,8 +89,8 @@ export default function MiPanelPage() {
                 onClick={() => { setSeccionActiva(sec.id); setSelectedRoom(null) }}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                   seccionActiva === sec.id
-                    ? "bg-white text-black shadow-lg shadow-white/10 scale-105"
-                    : "bg-white/5 text-white/50 hover:text-white hover:bg-white/10"
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/10 scale-105"
+                    : "bg-muted text-muted-foreground hover:text-foreground hover:bg-accent"
                 }`}
               >
                 {sec.icon}

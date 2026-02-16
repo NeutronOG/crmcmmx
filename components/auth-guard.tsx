@@ -19,8 +19,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
   // Determine which section the current route belongs to
   const seccionActual: Seccion | undefined = rutaSeccion[pathname]
 
-  // Each role's home route
-  const homeRoute = isAdmin ? "/" : isDueno ? "/mi-empresa" : "/mi-panel"
+  // Determine if user has dashboard access (admin, administracion)
+  const hasDashboardAccess = tieneAcceso("dashboard")
+  
+  // Each role's home route based on permissions
+  const homeRoute = isAdmin ? "/" : isDueno ? "/mi-empresa" : hasDashboardAccess ? "/" : "/mi-panel"
 
   useEffect(() => {
     if (!loading && usuario) {
@@ -29,14 +32,19 @@ export function AuthGuard({ children }: AuthGuardProps) {
         router.replace("/mi-empresa")
         return
       }
-      // Non-admin, non-dueño users trying to access non-panel routes → redirect to /mi-panel
-      if (!isAdmin && !isDueno && pathname !== "/mi-panel") {
-        router.replace("/mi-panel")
-        return
-      }
       // Admin users trying to access /mi-panel or /mi-empresa → redirect to dashboard
       if (isAdmin && (pathname === "/mi-panel" || pathname === "/mi-empresa")) {
         router.replace("/")
+        return
+      }
+      // Users with dashboard access trying to access /mi-panel or /mi-empresa → redirect to dashboard
+      if (hasDashboardAccess && !isAdmin && !isDueno && (pathname === "/mi-panel" || pathname === "/mi-empresa")) {
+        router.replace("/")
+        return
+      }
+      // Users without dashboard access (mi_panel users) trying to access admin routes → redirect to /mi-panel
+      if (!hasDashboardAccess && !isDueno && pathname !== "/mi-panel") {
+        router.replace("/mi-panel")
         return
       }
       // If user doesn't have access to the current section → redirect
@@ -44,7 +52,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
         router.replace(homeRoute)
       }
     }
-  }, [loading, usuario, seccionActual, tieneAcceso, isAdmin, isDueno, router, pathname, homeRoute])
+  }, [loading, usuario, seccionActual, tieneAcceso, isAdmin, isDueno, hasDashboardAccess, router, pathname, homeRoute])
 
   if (loading) {
     return (
@@ -67,8 +75,17 @@ export function AuthGuard({ children }: AuthGuardProps) {
     )
   }
 
-  // Non-admin, non-dueño on admin routes: show loading while redirect happens
-  if (!isAdmin && !isDueno && pathname !== "/mi-panel") {
+  // Users with dashboard access on /mi-panel or /mi-empresa: show loading while redirect happens
+  if (hasDashboardAccess && !isAdmin && !isDueno && (pathname === "/mi-panel" || pathname === "/mi-empresa")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Redirigiendo...</div>
+      </div>
+    )
+  }
+
+  // Users without dashboard access on admin routes: show loading while redirect happens
+  if (!hasDashboardAccess && !isDueno && pathname !== "/mi-panel") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Redirigiendo...</div>

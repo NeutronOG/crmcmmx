@@ -74,11 +74,11 @@ export function RecentActivity() {
                 <div
                   className={`size-12 rounded-2xl bg-gradient-to-br ${activity.gradient} flex items-center justify-center shadow-lg shadow-black/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 border border-white/10`}
                 >
-                  <Icon className="size-6 text-white drop-shadow-lg" />
+                  <Icon className="size-6 text-white dark:text-white drop-shadow-lg" />
                 </div>
                 <div className="flex-1 space-y-1">
                   <p className="text-sm leading-relaxed">
-                    <span className="font-semibold text-white group-hover:text-white/80 transition-colors duration-300">
+                    <span className="font-semibold text-foreground group-hover:text-foreground/80 transition-colors duration-300">
                       {activity.user}
                     </span>{" "}
                     <span className="text-muted-foreground/80">{activity.action}</span>{" "}

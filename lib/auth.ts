@@ -15,6 +15,7 @@ export type Rol =
   | "creador_contenido"
   | "creador_parrilla"
   | "administracion"
+  | "tareas"
   | "influencer"
   | "freelancer"
 
@@ -38,6 +39,7 @@ export const rolesLabels: Record<Rol, string> = {
   creador_contenido: "Creador de Contenido",
   creador_parrilla: "Creador de Parrilla",
   administracion: "Administración",
+  tareas: "Tareas",
   influencer: "Influencer",
   freelancer: "Freelancer",
 }
@@ -119,6 +121,10 @@ export const permisosPorRol: Record<Rol, Seccion[]> = {
     "mi_panel",
   ],
   administracion: [
+    "dashboard", "clientes", "proyectos", "responsables",
+    "calendario", "idea_room", "reportes", "leads",
+  ],
+  tareas: [
     "mi_panel",
   ],
   influencer: [
