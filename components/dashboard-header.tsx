@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { Users, Briefcase, Target, DollarSign, Sparkles, FileText, Palette, Video, Percent, UserCheck, ChevronDown, ChevronRight, ClipboardCheck, LogOut, Lightbulb, Calendar, Menu, X, LayoutDashboard, BarChart3 } from "lucide-react"
+import { Users, Briefcase, Target, DollarSign, Sparkles, FileText, Palette, Video, Percent, UserCheck, ChevronDown, ChevronRight, ClipboardCheck, LogOut, Lightbulb, Calendar, Menu, X, LayoutDashboard, BarChart3, Building2 } from "lucide-react"
 import { NotificacionesBell } from "@/components/notificaciones/notificaciones-bell"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useTheme } from "next-themes"
@@ -75,6 +75,7 @@ export function DashboardHeader() {
     },
     { label: "Idea Room", href: "/idea-room", icon: <Lightbulb className="size-4" />, seccion: "idea_room" },
     { label: "Calendario", href: "/calendario", icon: <Calendar className="size-4" />, seccion: "calendario" },
+    { label: "Mi Empresa", href: "/mi-empresa", icon: <Building2 className="size-4" />, seccion: "mi_empresa" },
     {
       label: "Finanzas",
       icon: <DollarSign className="size-4" />,

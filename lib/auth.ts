@@ -90,7 +90,7 @@ export const permisosPorRol: Record<Rol, Seccion[]> = {
     "dashboard", "nuevo_negocio", "cotizaciones", "leads", "clientes",
     "proyectos", "creadores", "responsables", "tareas",
     "facturacion", "nomina", "reportes", "comunicaciones",
-    "idea_room", "calendario",
+    "idea_room", "calendario", "mi_empresa",
   ],
   dueno: [
     "mi_empresa",
