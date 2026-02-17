@@ -61,6 +61,7 @@ export function DashboardHeader() {
         { label: "Cotizaciones", href: "/cotizaciones", icon: <FileText className="size-4" />, seccion: "cotizaciones" },
         { label: "Leads", href: "/leads", icon: <Target className="size-4" />, seccion: "leads" },
         { label: "Clientes", href: "/clients", icon: <Users className="size-4" />, seccion: "clientes" },
+        { label: "Mi Empresa", href: "/mi-empresa", icon: <Building2 className="size-4" />, seccion: "mi_empresa" },
       ],
     },
     {
@@ -75,7 +76,6 @@ export function DashboardHeader() {
     },
     { label: "Idea Room", href: "/idea-room", icon: <Lightbulb className="size-4" />, seccion: "idea_room" },
     { label: "Calendario", href: "/calendario", icon: <Calendar className="size-4" />, seccion: "calendario" },
-    { label: "Mi Empresa", href: "/mi-empresa", icon: <Building2 className="size-4" />, seccion: "mi_empresa" },
     {
       label: "Finanzas",
       icon: <DollarSign className="size-4" />,
