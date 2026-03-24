@@ -10,10 +10,12 @@ import { NuevaTareaDialog } from "@/components/tareas/nueva-tarea-dialog"
 import { EditarTareaDialog } from "@/components/tareas/editar-tarea-dialog"
 import { useAuth } from "@/components/auth-provider"
 import { LiquidBackground } from "@/components/liquid-background"
+import { DashboardHeader } from "@/components/dashboard-header"
 import { getTareas, getTareaById, updateTarea, deleteTarea, recalcularProgresoProyecto } from "@/lib/store"
 import type { Tarea } from "@/lib/store"
 import { toast } from "sonner"
 import { exportToCSV } from "@/lib/export-csv"
+import { exportTareasToExcel } from "@/lib/excel-utils"
 
 export default function TareasPage() {
   const { isAdmin } = useAuth()
@@ -115,11 +117,12 @@ export default function TareasPage() {
       <LiquidBackground />
 
       <div className="relative z-10">
+        <DashboardHeader />
         <TareasHeader
           vista={vista}
           onVistaChange={setVista}
           onNuevaTarea={() => setNuevaTareaOpen(true)}
-          onExport={() => {
+          onExportCSV={() => {
             exportToCSV(tareas, [
               { key: "titulo", label: "Título" },
               { key: "descripcion", label: "Descripción" },
@@ -132,7 +135,11 @@ export default function TareasPage() {
               { key: "fechaVencimiento", label: "Fecha Vencimiento" },
               { key: "etiquetas", label: "Etiquetas" },
             ], "tareas")
-            toast.success("Tareas exportadas")
+            toast.success("Tareas exportadas a CSV")
+          }}
+          onExportExcel={() => {
+            exportTareasToExcel(tareas)
+            toast.success("Tareas exportadas a Excel")
           }}
         />
         <main className="container mx-auto p-6 space-y-6 pb-20">

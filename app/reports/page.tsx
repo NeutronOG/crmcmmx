@@ -6,36 +6,58 @@ import { PerformanceCharts } from "@/components/reports/performance-charts"
 import { ClientReports } from "@/components/reports/client-reports"
 import { KPIAlerts } from "@/components/reports/kpi-alerts"
 import { LiquidBackground } from "@/components/liquid-background"
+import { DashboardHeader } from "@/components/dashboard-header"
 import { getClientes, getProyectos, getLeads, getTareas, getIngresos, getGastos } from "@/lib/store"
 import { exportToCSV } from "@/lib/export-csv"
+import * as XLSX from "xlsx"
+import { saveAs } from "file-saver"
 import { toast } from "sonner"
 
+async function buildReportRows() {
+  const [clientes, proyectos, leads, tareas, ingresos, gastos] = await Promise.all([
+    getClientes(), getProyectos(), getLeads(), getTareas(), getIngresos(), getGastos(),
+  ])
+  const totalIngresos = ingresos.reduce((s, i) => s + i.monto, 0)
+  const totalGastos = gastos.reduce((s, g) => s + g.monto, 0)
+  return [
+    { metrica: "Total Clientes", valor: clientes.length },
+    { metrica: "Clientes Activos", valor: clientes.filter(c => c.estado === "Activo").length },
+    { metrica: "Total Proyectos", valor: proyectos.length },
+    { metrica: "Proyectos En Progreso", valor: proyectos.filter(p => p.estado === "En Progreso").length },
+    { metrica: "Proyectos Completados", valor: proyectos.filter(p => p.estado === "Completado").length },
+    { metrica: "Total Leads", valor: leads.length },
+    { metrica: "Leads Ganados", valor: leads.filter(l => l.estado === "Ganado").length },
+    { metrica: "Total Tareas", valor: tareas.length },
+    { metrica: "Tareas Completadas", valor: tareas.filter(t => t.estado === "Completada").length },
+    { metrica: "Ingresos Totales", valor: totalIngresos },
+    { metrica: "Gastos Totales", valor: totalGastos },
+    { metrica: "Balance", valor: totalIngresos - totalGastos },
+  ]
+}
+
 export default function ReportsPage() {
-  const handleExport = async () => {
-    const [clientes, proyectos, leads, tareas, ingresos, gastos] = await Promise.all([
-      getClientes(), getProyectos(), getLeads(), getTareas(), getIngresos(), getGastos(),
-    ])
-    const totalIngresos = ingresos.reduce((s, i) => s + i.monto, 0)
-    const totalGastos = gastos.reduce((s, g) => s + g.importe, 0)
-    const rows = [
-      { metrica: "Total Clientes", valor: clientes.length },
-      { metrica: "Clientes Activos", valor: clientes.filter(c => c.estado === "Activo").length },
-      { metrica: "Total Proyectos", valor: proyectos.length },
-      { metrica: "Proyectos En Progreso", valor: proyectos.filter(p => p.estado === "En Progreso").length },
-      { metrica: "Proyectos Completados", valor: proyectos.filter(p => p.estado === "Completado").length },
-      { metrica: "Total Leads", valor: leads.length },
-      { metrica: "Leads Ganados", valor: leads.filter(l => l.estado === "Ganado").length },
-      { metrica: "Total Tareas", valor: tareas.length },
-      { metrica: "Tareas Completadas", valor: tareas.filter(t => t.estado === "Completada").length },
-      { metrica: "Ingresos Totales", valor: totalIngresos },
-      { metrica: "Gastos Totales", valor: totalGastos },
-      { metrica: "Balance", valor: totalIngresos - totalGastos },
-    ]
+  const handleExportCSV = async () => {
+    const rows = await buildReportRows()
     exportToCSV(rows, [
       { key: "metrica", label: "Métrica" },
       { key: "valor", label: "Valor" },
     ], "reporte_general")
-    toast.success("Reporte exportado")
+    toast.success("Reporte exportado a CSV")
+  }
+
+  const handleExportExcel = async () => {
+    const rows = await buildReportRows()
+    const data = rows.map(r => ({ "Métrica": r.metrica, "Valor": r.valor }))
+    const ws = XLSX.utils.json_to_sheet(data)
+    ws["!cols"] = [{ wch: 30 }, { wch: 18 }]
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, "Reporte General")
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" })
+    saveAs(
+      new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+      `reporte_general_${new Date().toISOString().split("T")[0]}.xlsx`
+    )
+    toast.success("Reporte exportado a Excel")
   }
 
   return (
@@ -43,7 +65,8 @@ export default function ReportsPage() {
       <LiquidBackground />
 
       <div className="relative z-10">
-        <ReportsHeader onExport={handleExport} />
+        <DashboardHeader />
+        <ReportsHeader onExportCSV={handleExportCSV} onExportExcel={handleExportExcel} />
         <main className="container mx-auto p-6 space-y-6 pb-20">
           <div className="space-y-3 pt-6">
             <h1 className="text-5xl font-bold tracking-tight text-balance text-foreground">

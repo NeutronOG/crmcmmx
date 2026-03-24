@@ -7,6 +7,7 @@ import { TareasDueno } from "@/components/mi-empresa/tareas-dueno"
 import { Autorizaciones } from "@/components/mi-empresa/autorizaciones"
 import { GestionUsuarios } from "@/components/mi-empresa/gestion-usuarios"
 import { LiquidBackground } from "@/components/liquid-background"
+import { DashboardHeader } from "@/components/dashboard-header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart3, ClipboardCheck, ShieldCheck, Users } from "lucide-react"
 
@@ -18,14 +19,16 @@ export default function MiEmpresaPage() {
   return (
     <div className="min-h-screen relative">
       <LiquidBackground />
-      <EmpresaHeader />
-      <main className="relative z-10 container mx-auto px-4 sm:px-6 py-6 max-w-6xl">
-        <div className="space-y-2 mb-6">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Bienvenido, {usuario.nombre.split(" ")[0]}
-          </h1>
-          <p className="text-muted-foreground">Panel ejecutivo de Central Marketing</p>
-        </div>
+      <div className="relative z-10">
+        <DashboardHeader />
+        <EmpresaHeader />
+        <main className="container mx-auto px-4 sm:px-6 py-6 max-w-6xl">
+          <div className="space-y-2 mb-6">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Bienvenido, {usuario.nombre.split(" ")[0]}
+            </h1>
+            <p className="text-muted-foreground">Panel ejecutivo de Central Marketing</p>
+          </div>
 
         <Tabs defaultValue="resumen" className="space-y-6">
           <TabsList className="glass border border-white/10 p-1 h-auto flex-wrap">
@@ -61,6 +64,7 @@ export default function MiEmpresaPage() {
           </TabsContent>
         </Tabs>
       </main>
+      </div>
     </div>
   )
 }

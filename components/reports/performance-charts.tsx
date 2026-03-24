@@ -46,7 +46,7 @@ export function PerformanceCharts() {
         const month = now.getMonth() - i
         const year = now.getFullYear() + Math.floor(month / 12)
         const m = ((month % 12) + 12) % 12 + 1
-        const monthIngresos = ingresos.filter(ing => ing.mes === m && ing.año === year)
+        const monthIngresos = ingresos.filter(ing => { const d = new Date(ing.fecha); return d.getMonth() + 1 === m && d.getFullYear() === year })
         const total = monthIngresos.reduce((sum, ing) => sum + ing.monto, 0)
         monthly.push(total)
       }

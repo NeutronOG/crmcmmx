@@ -1,38 +1,29 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingUp, DollarSign, Users, Percent, CreditCard } from "lucide-react"
+import { DollarSign, Users, Percent, CreditCard } from "lucide-react"
+import { getNominaEmpleados } from "@/lib/store"
+import type { NominaEmpleado } from "@/lib/store"
 
 export function NominaStats() {
+  const [empleados, setEmpleados] = useState<NominaEmpleado[]>([])
+
+  useEffect(() => {
+    getNominaEmpleados().then(setEmpleados)
+  }, [])
+
+  const totalSalarios = empleados.reduce((s, e) => s + e.salarioBase, 0)
+  const totalBonos = empleados.reduce((s, e) => s + e.bonos, 0)
+  const totalNomina = totalSalarios + totalBonos
+  const pendientes = empleados.filter(e => e.estado === "Pendiente" || e.estado === "Procesando")
+  const totalPendiente = pendientes.reduce((s, e) => s + e.salarioBase + e.bonos, 0)
+
   const stats = [
-    {
-      title: "Nómina Total",
-      value: "$45,800",
-      change: "+12%",
-      icon: DollarSign,
-      color: "from-[oklch(0.72_0.10_155)] to-[oklch(0.52_0.14_165)]",
-    },
-    {
-      title: "Empleados Activos",
-      value: "18",
-      change: "+2",
-      icon: Users,
-      color: "from-[oklch(0.68_0.10_245)] to-[oklch(0.55_0.12_245)]",
-    },
-    {
-      title: "Comisiones Pagadas",
-      value: "$12,350",
-      change: "+25%",
-      icon: Percent,
-      color: "from-[oklch(0.68_0.12_300)] to-[oklch(0.52_0.12_350)]",
-    },
-    {
-      title: "Pagos Pendientes",
-      value: "$8,200",
-      change: "-15%",
-      icon: CreditCard,
-      color: "from-[oklch(0.76_0.10_70)] to-[oklch(0.74_0.11_55)]",
-    },
+    { title: "Nómina Total", value: `$${totalNomina.toLocaleString("es-MX")}`, icon: DollarSign, color: "from-[oklch(0.72_0.10_155)] to-[oklch(0.52_0.14_165)]" },
+    { title: "Empleados", value: `${empleados.length}`, icon: Users, color: "from-[oklch(0.68_0.10_245)] to-[oklch(0.55_0.12_245)]" },
+    { title: "Bonos / Comisiones", value: `$${totalBonos.toLocaleString("es-MX")}`, icon: Percent, color: "from-[oklch(0.68_0.12_300)] to-[oklch(0.52_0.12_350)]" },
+    { title: "Pagos Pendientes", value: `$${totalPendiente.toLocaleString("es-MX")}`, icon: CreditCard, color: "from-[oklch(0.76_0.10_70)] to-[oklch(0.74_0.11_55)]" },
   ]
 
   return (
@@ -47,10 +38,7 @@ export function NominaStats() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stat.value}</div>
-            <p className={`text-xs flex items-center gap-1 mt-1 ${stat.change.startsWith('+') || stat.change.startsWith('-') && stat.title === "Pagos Pendientes" ? 'satin-green' : 'satin-green'}`}>
-              <TrendingUp className="h-3 w-3" />
-              {stat.change} vs mes anterior
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">datos en tiempo real</p>
           </CardContent>
         </Card>
       ))}

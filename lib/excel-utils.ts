@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
-import type { Cliente, OnboardingClient } from './store'
+import type { Cliente, OnboardingClient, Cotizacion, Lead, Proyecto, Tarea } from './store'
 
 // Mapeo de columnas para Excel (español)
 const CLIENTE_COLUMNS = {
@@ -290,6 +290,99 @@ export function importOnboardingFromExcel(file: File): Promise<OnboardingClient[
 function validateEtapaOnboarding(etapa: string): OnboardingClient['etapa'] {
   const validEtapas = ['Bienvenida', 'Documentación', 'Kickoff', 'Activo']
   return validEtapas.includes(etapa) ? etapa as OnboardingClient['etapa'] : 'Bienvenida'
+}
+
+// ==================== COTIZACIONES EXCEL ====================
+
+export function exportCotizacionesToExcel(cotizaciones: Cotizacion[], filename = 'cotizaciones_crm') {
+  const data = cotizaciones.map(c => ({
+    'Cliente': c.cliente,
+    'Proyecto': c.proyecto,
+    'Valor ($)': c.valor,
+    'Estado': c.estado,
+    'Fecha Creación': c.fechaCreacion,
+    'Fecha Vencimiento': c.fechaVencimiento,
+    'Seguimientos': c.seguimientos,
+    'Responsable': c.responsable,
+  }))
+  const ws = XLSX.utils.json_to_sheet(data)
+  ws['!cols'] = [{ wch: 22 }, { wch: 28 }, { wch: 14 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 12 }, { wch: 20 }]
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Cotizaciones')
+  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  saveAs(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`)
+}
+
+// ==================== LEADS EXCEL ====================
+
+export function exportLeadesToExcel(leads: Lead[], filename = 'leads_crm') {
+  const data = leads.map(l => ({
+    'Nombre': l.nombre,
+    'Empresa': l.empresa,
+    'Email': l.email,
+    'Teléfono': l.telefono,
+    'Origen': l.origen,
+    'Estado': l.estado,
+    'Valor Estimado ($)': l.valorEstimado,
+    'Probabilidad (%)': l.probabilidad,
+    'Responsable': l.responsable,
+    'Fecha Creación': l.fechaCreacion,
+    'Último Contacto': l.ultimoContacto,
+    'Notas': l.notas,
+  }))
+  const ws = XLSX.utils.json_to_sheet(data)
+  ws['!cols'] = [{ wch: 20 }, { wch: 24 }, { wch: 28 }, { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 14 }, { wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 40 }]
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Leads')
+  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  saveAs(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`)
+}
+
+// ==================== PROYECTOS EXCEL ====================
+
+export function exportProyectosToExcel(proyectos: Proyecto[], filename = 'proyectos_crm') {
+  const data = proyectos.map(p => ({
+    'Nombre': p.nombre,
+    'Cliente': p.cliente,
+    'Tipo': p.tipo,
+    'Estado': p.estado,
+    'Fecha Inicio': p.fechaInicio,
+    'Fecha Entrega': p.fechaEntrega,
+    'Presupuesto ($)': p.presupuesto,
+    'Responsable': p.responsable,
+    'Progreso (%)': p.progreso,
+    'Descripción': p.descripcion,
+  }))
+  const ws = XLSX.utils.json_to_sheet(data)
+  ws['!cols'] = [{ wch: 24 }, { wch: 22 }, { wch: 16 }, { wch: 16 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 20 }, { wch: 12 }, { wch: 40 }]
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Proyectos')
+  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  saveAs(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`)
+}
+
+// ==================== TAREAS EXCEL ====================
+
+export function exportTareasToExcel(tareas: Tarea[], filename = 'tareas_crm') {
+  const data = tareas.map(t => ({
+    'Título': t.titulo,
+    'Descripción': t.descripcion,
+    'Proyecto': t.proyecto,
+    'Cliente': t.cliente,
+    'Asignado': t.asignado,
+    'Estado': t.estado,
+    'Prioridad': t.prioridad,
+    'Fecha Creación': t.fechaCreacion,
+    'Fecha Vencimiento': t.fechaVencimiento,
+    'Fecha Completada': t.fechaCompletada,
+    'Etiquetas': t.etiquetas.join(', '),
+  }))
+  const ws = XLSX.utils.json_to_sheet(data)
+  ws['!cols'] = [{ wch: 28 }, { wch: 40 }, { wch: 20 }, { wch: 20 }, { wch: 18 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 24 }]
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Tareas')
+  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  saveAs(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
 // Exportar plantilla de onboarding

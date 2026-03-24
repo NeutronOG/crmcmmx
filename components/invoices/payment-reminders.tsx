@@ -1,147 +1,81 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Bell, Send, Clock, DollarSign, AlertTriangle } from "lucide-react"
-
-const reminders = [
-  {
-    id: 1,
-    client: "Tech Solutions SA",
-    invoice: "INV-2025-042",
-    amount: 15000,
-    dueDate: "2025-01-20",
-    daysOverdue: 0,
-    status: "due-soon",
-    lastReminder: null,
-    autoReminders: true,
-  },
-  {
-    id: 2,
-    client: "RetailMart",
-    invoice: "INV-2025-038",
-    amount: 5000,
-    dueDate: "2025-01-18",
-    daysOverdue: 0,
-    status: "due-soon",
-    lastReminder: "2025-01-15",
-    autoReminders: true,
-  },
-  {
-    id: 3,
-    client: "StartupXYZ",
-    invoice: "INV-2025-031",
-    amount: 8000,
-    dueDate: "2025-01-10",
-    daysOverdue: 2,
-    status: "overdue",
-    lastReminder: "2025-01-11",
-    autoReminders: true,
-  },
-]
+import { Bell, Clock, DollarSign, AlertTriangle } from "lucide-react"
+import { getCotizaciones } from "@/lib/store"
+import type { Cotizacion } from "@/lib/store"
 
 export function PaymentReminders() {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+  const [pendientes, setPendientes] = useState<Cotizacion[]>([])
+
+  useEffect(() => {
+    getCotizaciones().then(data => {
+      setPendientes(data.filter(c => c.estado === "Enviada" || c.estado === "En Negociación"))
+    })
+  }, [])
+
+  if (pendientes.length === 0) {
+    return (
+      <div className="space-y-4">
         <div className="flex items-center gap-3">
           <Bell className="h-6 w-6 satin-yellow" />
-          <h2 className="text-2xl font-bold">Recordatorios de Pago</h2>
-          <Badge variant="secondary" className="rounded-full">
-            {reminders.length}
-          </Badge>
+          <h2 className="text-2xl font-bold">Cotizaciones Pendientes</h2>
+          <Badge variant="secondary" className="rounded-full">0</Badge>
         </div>
-        <Button variant="outline" size="sm">
-          Configurar Automatización
-        </Button>
+        <Card className="glass-card p-8 rounded-xl text-center text-muted-foreground">
+          No hay cotizaciones pendientes de respuesta.
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Bell className="h-6 w-6 satin-yellow" />
+        <h2 className="text-2xl font-bold">Cotizaciones Pendientes</h2>
+        <Badge variant="secondary" className="rounded-full">{pendientes.length}</Badge>
       </div>
 
       <div className="grid gap-4">
-        {reminders.map((reminder) => (
-          <Card key={reminder.id} className="glass-card p-5 rounded-xl hover:scale-[1.01] transition-all duration-300">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-4 flex-1">
-                <div
-                  className={`p-3 rounded-xl ${
-                    reminder.status === "overdue" ? "satin-red-bg satin-red" : "satin-yellow-bg satin-yellow"
-                  }`}
-                >
-                  {reminder.status === "overdue" ? (
-                    <AlertTriangle className="h-6 w-6" />
-                  ) : (
-                    <Clock className="h-6 w-6" />
-                  )}
+        {pendientes.map(c => {
+          const isNeg = c.estado === "En Negociación"
+          return (
+            <Card key={c.id} className="glass-card p-5 rounded-xl hover:scale-[1.005] transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className={`p-3 rounded-xl ${isNeg ? "satin-yellow-bg" : "satin-blue-bg"}`}>
+                  {isNeg ? <AlertTriangle className="h-5 w-5 satin-yellow" /> : <Clock className="h-5 w-5 satin-blue" />}
                 </div>
-
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-lg">{reminder.client}</h3>
-                    <Badge
-                      variant={reminder.status === "overdue" ? "destructive" : "secondary"}
-                      className="rounded-full"
-                    >
-                      {reminder.status === "overdue" ? `Vencida ${reminder.daysOverdue}d` : "Próximo vencimiento"}
-                    </Badge>
-                    {reminder.autoReminders && (
-                      <Badge variant="outline" className="rounded-full gap-1">
-                        <Bell className="h-3 w-3" />
-                        Auto
-                      </Badge>
-                    )}
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h3 className="font-semibold">{c.cliente || "—"}</h3>
+                    <Badge variant={isNeg ? "secondary" : "outline"} className="rounded-full">{c.estado}</Badge>
                   </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Factura</p>
-                      <p className="text-sm font-semibold text-foreground">{reminder.invoice}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Monto</p>
+                  <p className="text-sm text-muted-foreground">{c.proyecto || "Sin proyecto"}</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                    <div className="space-y-0.5">
+                      <p className="text-xs text-muted-foreground">Valor</p>
                       <div className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4 satin-green" />
-                        <p className="text-sm font-semibold text-foreground">
-                          ${reminder.amount.toLocaleString("es-MX")}
-                        </p>
+                        <DollarSign className="h-3.5 w-3.5 satin-green" />
+                        <span className="font-semibold satin-green">${c.valor.toLocaleString("es-MX")}</span>
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Vencimiento</p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {new Date(reminder.dueDate).toLocaleDateString("es-ES")}
-                      </p>
+                    <div className="space-y-0.5">
+                      <p className="text-xs text-muted-foreground">Creada</p>
+                      <span>{c.fechaCreacion || "—"}</span>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Último Recordatorio</p>
-                      <p className="text-sm font-semibold text-muted-foreground">
-                        {reminder.lastReminder
-                          ? new Date(reminder.lastReminder).toLocaleDateString("es-ES")
-                          : "No enviado"}
-                      </p>
+                    <div className="space-y-0.5">
+                      <p className="text-xs text-muted-foreground">Responsable</p>
+                      <span>{c.responsable || "—"}</span>
                     </div>
                   </div>
-
-                  {reminder.status === "overdue" && (
-                    <div className="flex items-center gap-2 text-sm satin-red">
-                      <AlertTriangle className="h-4 w-4" />
-                      <span>Recordatorio automático programado para hoy</span>
-                    </div>
-                  )}
                 </div>
               </div>
-
-              <div className="flex flex-col gap-2">
-                <Button size="sm" className="gap-2">
-                  <Send className="h-4 w-4" />
-                  Enviar Ahora
-                </Button>
-                <Button variant="outline" size="sm">
-                  Ver Factura
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          )
+        })}
       </div>
     </div>
   )

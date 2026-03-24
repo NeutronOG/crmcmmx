@@ -19,7 +19,7 @@ export function StatsCards() {
       const totalLeads = l.length
       const conversion = totalLeads > 0 ? Math.round((ganados / totalLeads) * 100) : 0
       const now = new Date()
-      const ingresosMes = i.filter(ing => ing.mes === (now.getMonth() + 1) && ing.año === now.getFullYear()).reduce((sum, ing) => sum + ing.monto, 0)
+      const ingresosMes = i.filter(ing => { const d = new Date(ing.fecha); return d.getMonth() + 1 === now.getMonth() + 1 && d.getFullYear() === now.getFullYear() }).reduce((sum, ing) => sum + ing.monto, 0)
       setData({ clientes: c.length, proyectos: activos, conversion, ingresos: ingresosMes })
     })
   }, [])

@@ -5,14 +5,16 @@ import { ClientsHeader } from "@/components/clients/clients-header"
 import { OnboardingPipeline } from "@/components/clients/onboarding-pipeline"
 import { ClientsList } from "@/components/clients/clients-list"
 import { LiquidBackground } from "@/components/liquid-background"
+import { DashboardHeader } from "@/components/dashboard-header"
 import { getClientes } from "@/lib/store"
 import { exportToCSV } from "@/lib/export-csv"
+import { exportClientesToExcel } from "@/lib/excel-utils"
 import { toast } from "sonner"
 
 export default function ClientsPage() {
   const [refreshKey, setRefreshKey] = useState(0)
 
-  const handleExport = async () => {
+  const handleExportCSV = async () => {
     const clientes = await getClientes()
     exportToCSV(clientes, [
       { key: "nombre", label: "Nombre" },
@@ -26,7 +28,13 @@ export default function ClientsPage() {
       { key: "ultimoContacto", label: "Último Contacto" },
       { key: "notas", label: "Notas" },
     ], "clientes")
-    toast.success("Clientes exportados")
+    toast.success("Clientes exportados a CSV")
+  }
+
+  const handleExportExcel = async () => {
+    const clientes = await getClientes()
+    exportClientesToExcel(clientes)
+    toast.success("Clientes exportados a Excel")
   }
 
   return (
@@ -34,7 +42,12 @@ export default function ClientsPage() {
       <LiquidBackground />
 
       <div className="relative z-10">
-        <ClientsHeader onCreated={() => setRefreshKey(k => k + 1)} onExport={handleExport} />
+        <DashboardHeader />
+        <ClientsHeader
+          onCreated={() => setRefreshKey(k => k + 1)}
+          onExportCSV={handleExportCSV}
+          onExportExcel={handleExportExcel}
+        />
         <main className="container mx-auto p-6 space-y-6 pb-20">
           <div className="space-y-3 pt-6">
             <h1 className="text-5xl font-bold tracking-tight text-balance text-foreground">

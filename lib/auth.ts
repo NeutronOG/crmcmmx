@@ -6,6 +6,13 @@ import { supabase } from './supabase'
 export type Rol =
   | "admin"
   | "dueno"
+  | "ejecutivo_cuenta"
+  | "coord_diseno"
+  | "coord_mkt"
+  | "aux_mkt"
+  | "contabilidad"
+  | "ia"
+  | "disenador"
   | "diseñador_grafico"
   | "diseñador_industrial"
   | "produccion_audiovisual"
@@ -25,11 +32,19 @@ export interface Usuario {
   email: string
   rol: Rol
   avatar?: string
+  password?: string
 }
 
 export const rolesLabels: Record<Rol, string> = {
   admin: "Administrador",
   dueno: "Dueño",
+  ejecutivo_cuenta: "Ejecutivo de Cuenta",
+  coord_diseno: "Coordinador de Diseño",
+  coord_mkt: "Coordinador de Marketing",
+  aux_mkt: "Auxiliar de Marketing",
+  contabilidad: "Contabilidad",
+  ia: "IA",
+  disenador: "Diseñador",
   diseñador_grafico: "Diseñador Gráfico",
   diseñador_industrial: "Diseñador Industrial",
   produccion_audiovisual: "Producción Audiovisual",
@@ -93,9 +108,32 @@ export const permisosPorRol: Record<Rol, Seccion[]> = {
     "idea_room", "calendario", "mi_empresa",
   ],
   dueno: [
-    "mi_empresa",
-    "creadores",
+    "dashboard", "reportes", "facturacion", "nomina",
+    "clientes", "proyectos", "cotizaciones", "leads",
+    "mi_empresa", "calendario", "idea_room",
   ],
+  ejecutivo_cuenta: [
+    "dashboard", "leads", "clientes", "proyectos", "cotizaciones",
+    "nuevo_negocio", "tareas", "calendario", "comunicaciones", "idea_room",
+  ],
+  coord_diseno: [
+    "dashboard", "proyectos", "tareas", "clientes",
+    "calendario", "idea_room", "comunicaciones",
+  ],
+  coord_mkt: [
+    "dashboard", "leads", "clientes", "proyectos", "tareas",
+    "cotizaciones", "nuevo_negocio", "calendario", "comunicaciones", "idea_room", "creadores",
+  ],
+  aux_mkt: [
+    "dashboard", "tareas", "proyectos", "calendario", "comunicaciones", "idea_room",
+  ],
+  contabilidad: [
+    "dashboard", "facturacion", "nomina", "reportes", "clientes", "calendario",
+  ],
+  ia: [
+    "dashboard", "tareas", "proyectos", "idea_room", "calendario",
+  ],
+  disenador: ["mi_panel", "tareas", "calendario"],
   diseñador_grafico: [
     "mi_panel",
   ],
@@ -184,7 +222,16 @@ export async function getUsuarios(): Promise<Usuario[]> {
     email: row.email,
     rol: row.rol as Rol,
     avatar: row.avatar || undefined,
+    password: row.password || undefined,
   }))
+}
+
+export async function updateUsuarioPerfil(id: string, updates: { password?: string; avatar?: string }): Promise<void> {
+  const payload: Record<string, string> = {}
+  if (updates.password !== undefined) payload.password = updates.password
+  if (updates.avatar !== undefined) payload.avatar = updates.avatar
+  const { error } = await supabase.from('usuarios').update(payload).eq('id', id)
+  if (error) throw error
 }
 
 // Funciones de autenticación con localStorage (sesión local)

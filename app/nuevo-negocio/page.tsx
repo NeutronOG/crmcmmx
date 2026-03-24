@@ -9,6 +9,11 @@ import { NuevoNegocioFilters } from "@/components/nuevo-negocio/nuevo-negocio-fi
 import { getLeads, updateLead, deleteLead } from "@/lib/store"
 import type { Lead } from "@/lib/store"
 import { toast } from "sonner"
+import { exportToCSV } from "@/lib/export-csv"
+import { exportLeadesToExcel } from "@/lib/excel-utils"
+import { Button } from "@/components/ui/button"
+import { Download } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export default function NuevoNegocioPage() {
   const [leads, setLeads] = useState<Lead[]>([])
@@ -62,13 +67,40 @@ export default function NuevoNegocioPage() {
       <div className="relative z-10">
         <DashboardHeader />
         <main className="container mx-auto p-6 space-y-8 pb-20">
-          <div className="space-y-3 pt-6">
-            <h1 className="text-5xl font-bold tracking-tight text-balance text-foreground">
-              Nuevo Negocio / Branding
-            </h1>
-            <p className="text-lg text-muted-foreground/90">
-              Gestiona oportunidades de negocio y proyectos de branding
-            </p>
+          <div className="flex items-end justify-between gap-4 pt-6 flex-wrap">
+            <div className="space-y-3">
+              <h1 className="text-5xl font-bold tracking-tight text-balance text-foreground">
+                Nuevo Negocio / Branding
+              </h1>
+              <p className="text-lg text-muted-foreground/90">
+                Gestiona oportunidades de negocio y proyectos de branding
+              </p>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 shrink-0">
+                  <Download className="h-4 w-4" />
+                  Exportar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => {
+                  exportToCSV(leads, [
+                    { key: "nombre", label: "Nombre" },
+                    { key: "empresa", label: "Empresa" },
+                    { key: "email", label: "Email" },
+                    { key: "estado", label: "Estado" },
+                    { key: "valorEstimado", label: "Valor Estimado" },
+                    { key: "responsable", label: "Responsable" },
+                  ], "oportunidades")
+                  toast.success("Exportado a CSV")
+                }}>Exportar CSV</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  exportLeadesToExcel(leads, "oportunidades_negocio")
+                  toast.success("Exportado a Excel")
+                }}>Exportar Excel (.xlsx)</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <NuevoNegocioStats />

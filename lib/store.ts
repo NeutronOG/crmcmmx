@@ -724,76 +724,6 @@ export async function getProyectosPipeline(): Promise<Proyecto[]> {
 }
 
 // =============================================
-// INGRESOS Y GASTOS
-// =============================================
-
-export interface Ingreso {
-  id: string
-  tipoDeGasto: string
-  monto: number
-  dia: number
-  mes: number
-  año: number
-}
-
-export interface Gasto {
-  id: string
-  tipoDeGasto: string
-  importe: number
-  dia: number
-  mes: number
-  año: number
-}
-
-export async function getIngresos(): Promise<Ingreso[]> {
-  const { data, error } = await supabase.from('ingresos').select('*').order('año', { ascending: false }).order('mes', { ascending: false })
-  if (error) { console.error('Error fetching ingresos:', error); return [] }
-  return (data || []).map(row => ({
-    id: row.id,
-    tipoDeGasto: row.tipo_de_gasto,
-    monto: Number(row.monto) || 0,
-    dia: row.dia,
-    mes: row.mes,
-    año: row.año,
-  }))
-}
-
-export async function getGastos(): Promise<Gasto[]> {
-  const { data, error } = await supabase.from('gastos').select('*').order('año', { ascending: false }).order('mes', { ascending: false })
-  if (error) { console.error('Error fetching gastos:', error); return [] }
-  return (data || []).map(row => ({
-    id: row.id,
-    tipoDeGasto: row.tipo_de_gasto,
-    importe: Number(row.importe) || 0,
-    dia: row.dia,
-    mes: row.mes,
-    año: row.año,
-  }))
-}
-
-export async function addIngreso(ingreso: Omit<Ingreso, 'id'>): Promise<void> {
-  const { error } = await supabase.from('ingresos').insert({
-    tipo_de_gasto: ingreso.tipoDeGasto,
-    monto: ingreso.monto,
-    dia: ingreso.dia,
-    mes: ingreso.mes,
-    año: ingreso.año,
-  })
-  if (error) throw error
-}
-
-export async function addGasto(gasto: Omit<Gasto, 'id'>): Promise<void> {
-  const { error } = await supabase.from('gastos').insert({
-    tipo_de_gasto: gasto.tipoDeGasto,
-    importe: gasto.importe,
-    dia: gasto.dia,
-    mes: gasto.mes,
-    año: gasto.año,
-  })
-  if (error) throw error
-}
-
-// =============================================
 // AUTO-UPDATE PROJECT PROGRESS FROM TASKS
 // =============================================
 
@@ -1276,5 +1206,181 @@ export async function upsertCalificacion(cal: { creadorId: string; evaluador: st
     seguimiento_brief: cal.seguimientoBrief,
     comentario: cal.comentario,
   }, { onConflict: 'creador_id,evaluador' })
+  if (error) throw error
+}
+
+// =============================================
+// INGRESOS
+// =============================================
+
+export interface Ingreso {
+  id: string
+  concepto: string
+  monto: number
+  fecha: string
+  cliente?: string
+  proyectoId?: string
+  categoria: string
+  notas?: string
+  createdAt: string
+}
+
+export async function getIngresos(): Promise<Ingreso[]> {
+  const { data, error } = await supabase
+    .from('ingresos')
+    .select('*')
+    .order('fecha', { ascending: false })
+  if (error) { console.error('Error fetching ingresos:', error); return [] }
+  return (data || []).map(r => ({
+    id: r.id,
+    concepto: r.concepto || '',
+    monto: Number(r.monto) || 0,
+    fecha: r.fecha || '',
+    cliente: r.cliente || '',
+    proyectoId: r.proyecto_id || '',
+    categoria: r.categoria || 'Otro',
+    notas: r.notas || '',
+    createdAt: r.created_at,
+  }))
+}
+
+export async function addIngreso(ingreso: Omit<Ingreso, 'id' | 'createdAt'>): Promise<Ingreso> {
+  const { data, error } = await supabase.from('ingresos').insert({
+    concepto: ingreso.concepto,
+    monto: ingreso.monto,
+    fecha: ingreso.fecha,
+    cliente: ingreso.cliente || null,
+    proyecto_id: ingreso.proyectoId || null,
+    categoria: ingreso.categoria,
+    notas: ingreso.notas || null,
+  }).select().single()
+  if (error) throw error
+  return {
+    id: data.id,
+    concepto: data.concepto,
+    monto: Number(data.monto),
+    fecha: data.fecha,
+    cliente: data.cliente || '',
+    proyectoId: data.proyecto_id || '',
+    categoria: data.categoria,
+    notas: data.notas || '',
+    createdAt: data.created_at,
+  }
+}
+
+export async function deleteIngreso(id: string): Promise<void> {
+  const { error } = await supabase.from('ingresos').delete().eq('id', id)
+  if (error) throw error
+}
+
+// =============================================
+// GASTOS
+// =============================================
+
+export interface Gasto {
+  id: string
+  concepto: string
+  monto: number
+  fecha: string
+  categoria: string
+  proveedor?: string
+  notas?: string
+  createdAt: string
+}
+
+export async function getGastos(): Promise<Gasto[]> {
+  const { data, error } = await supabase
+    .from('gastos')
+    .select('*')
+    .order('fecha', { ascending: false })
+  if (error) { console.error('Error fetching gastos:', error); return [] }
+  return (data || []).map(r => ({
+    id: r.id,
+    concepto: r.concepto || '',
+    monto: Number(r.monto) || 0,
+    fecha: r.fecha || '',
+    categoria: r.categoria || 'Otro',
+    proveedor: r.proveedor || '',
+    notas: r.notas || '',
+    createdAt: r.created_at,
+  }))
+}
+
+export async function addGasto(gasto: Omit<Gasto, 'id' | 'createdAt'>): Promise<Gasto> {
+  const { data, error } = await supabase.from('gastos').insert({
+    concepto: gasto.concepto,
+    monto: gasto.monto,
+    fecha: gasto.fecha,
+    categoria: gasto.categoria,
+    proveedor: gasto.proveedor || null,
+    notas: gasto.notas || null,
+  }).select().single()
+  if (error) throw error
+  return {
+    id: data.id,
+    concepto: data.concepto,
+    monto: Number(data.monto),
+    fecha: data.fecha,
+    categoria: data.categoria,
+    proveedor: data.proveedor || '',
+    notas: data.notas || '',
+    createdAt: data.created_at,
+  }
+}
+
+export async function deleteGasto(id: string): Promise<void> {
+  const { error } = await supabase.from('gastos').delete().eq('id', id)
+  if (error) throw error
+}
+
+// =============================================
+// NOMINA (extiende usuarios de auth)
+// =============================================
+
+export interface NominaEmpleado {
+  id: string
+  nombre: string
+  email: string
+  rol: string
+  salarioBase: number
+  porcentajeComision: number
+  bonos: number
+  estado: 'Pagado' | 'Pendiente' | 'Procesando'
+  fechaPago?: string
+}
+
+export async function getNominaEmpleados(): Promise<NominaEmpleado[]> {
+  const { data, error } = await supabase
+    .from('usuarios')
+    .select('id, nombre, email, rol, salario_base, porcentaje_comision, bonos, estado_nomina, fecha_pago')
+    .order('nombre')
+  if (error) { console.error('Error fetching nomina:', error); return [] }
+  return (data || []).map(r => ({
+    id: r.id,
+    nombre: r.nombre,
+    email: r.email,
+    rol: r.rol,
+    salarioBase: Number(r.salario_base) || 0,
+    porcentajeComision: Number(r.porcentaje_comision) || 0,
+    bonos: Number(r.bonos) || 0,
+    estado: (r.estado_nomina as NominaEmpleado['estado']) || 'Pendiente',
+    fechaPago: r.fecha_pago || '',
+  }))
+}
+
+export async function updateNominaEmpleado(id: string, updates: {
+  salarioBase?: number
+  porcentajeComision?: number
+  bonos?: number
+  estado?: NominaEmpleado['estado']
+  fechaPago?: string
+}): Promise<void> {
+  const payload: Record<string, unknown> = {}
+  if (updates.salarioBase !== undefined) payload.salario_base = updates.salarioBase
+  if (updates.porcentajeComision !== undefined) payload.porcentaje_comision = updates.porcentajeComision
+  if (updates.bonos !== undefined) payload.bonos = updates.bonos
+  if (updates.estado !== undefined) payload.estado_nomina = updates.estado
+  if (updates.fechaPago !== undefined) payload.fecha_pago = updates.fechaPago
+  const { error } = await supabase.from('usuarios').update(payload).eq('id', id)
   if (error) throw error
 }
