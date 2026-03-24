@@ -12,6 +12,7 @@ import Image from "next/image"
 import { LiquidBackground } from "@/components/liquid-background"
 import { useTheme } from "next-themes"
 import { getUsuarios, rolesLabels } from "@/lib/auth"
+import { getRolColor } from "@/lib/rol-colors"
 import type { Usuario } from "@/lib/auth"
 import { BiometricPrompt } from "@/components/biometric-prompt"
 import {
@@ -65,20 +66,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
     )
   })
 
-  const getRolColor = (rol: string) => {
-    const colors: Record<string, string> = {
-      admin: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-      dueno: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
-      ejecutivo_cuenta: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-      coord_diseno: "bg-pink-500/20 text-pink-300 border-pink-500/30",
-      coord_mkt: "bg-green-500/20 text-green-300 border-green-500/30",
-      aux_mkt: "bg-green-500/15 text-green-400/80 border-green-500/20",
-      contabilidad: "bg-orange-500/20 text-orange-300 border-orange-500/30",
-      ia: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
-      disenador: "bg-rose-500/20 text-rose-300 border-rose-500/30",
-    }
-    return colors[rol] ?? "bg-white/10 text-white/70 border-white/15"
-  }
 
   const initials = (nombre: string) =>
     nombre.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()

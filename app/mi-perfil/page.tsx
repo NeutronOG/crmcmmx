@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Camera, Eye, EyeOff, Save, Upload, User, Fingerprint, Plus, Trash2, Smartphone, ShieldCheck } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { rolesLabels, updateUsuarioPerfil } from "@/lib/auth"
+import { getRolColor } from "@/lib/rol-colors"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 import {
@@ -202,7 +203,7 @@ export default function MiPerfilPage() {
                 <div>
                   <p className="font-semibold text-lg">{usuario.nombre}</p>
                   <p className="text-sm text-muted-foreground">{usuario.email}</p>
-                  <Badge variant="outline" className="mt-1 text-xs">
+                  <Badge variant="outline" className={`mt-1 text-xs rounded-full border ${getRolColor(usuario.rol)}`}>
                     {rolesLabels[usuario.rol] ?? usuario.rol}
                   </Badge>
                 </div>
