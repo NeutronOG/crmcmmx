@@ -42,10 +42,23 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   const passwordRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    getUsuarios().then((data) => {
-      setUsuarios(data)
-      setLoading(false)
-    })
+    const fetchUsuarios = async () => {
+      try {
+        const data = await getUsuarios()
+        setUsuarios(data)
+      } catch (error) {
+        console.error('Error fetching usuarios:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchUsuarios()
+    
+    // Refresh usuarios every 30 seconds to keep in sync with Supabase
+    const interval = setInterval(fetchUsuarios, 30000)
+    
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {

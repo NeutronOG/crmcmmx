@@ -212,10 +212,13 @@ export async function getUsuarios(): Promise<Usuario[]> {
     .from('usuarios')
     .select('*')
     .order('nombre')
+    .abortSignal(new AbortController().signal)
+  
   if (error) {
     console.error('Error fetching usuarios:', error)
     return []
   }
+  
   return (data || []).map(row => ({
     id: row.id,
     nombre: row.nombre,
