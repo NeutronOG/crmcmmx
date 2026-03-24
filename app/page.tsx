@@ -2,7 +2,6 @@ import { DashboardHeader } from "@/components/dashboard-header"
 import { StatsCards } from "@/components/stats-cards"
 import { RecentClients } from "@/components/recent-clients"
 import { ActiveProjects } from "@/components/active-projects"
-import { RecentActivity } from "@/components/recent-activity"
 import { LiquidBackground } from "@/components/liquid-background"
 
 export default function DashboardPage() {
@@ -26,8 +25,6 @@ export default function DashboardPage() {
             <RecentClients />
             <ActiveProjects />
           </div>
-
-          <RecentActivity />
         </main>
       </div>
     </div>
