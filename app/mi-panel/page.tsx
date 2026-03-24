@@ -11,7 +11,6 @@ import { IdeaRoomList } from "@/components/idea-room/idea-room-list"
 import { IdeaRoomChat } from "@/components/idea-room/idea-room-chat"
 import { Calendario } from "@/components/calendario/calendario"
 import { LiquidBackground } from "@/components/liquid-background"
-import { DashboardHeader } from "@/components/dashboard-header"
 import { useAuth } from "@/components/auth-provider"
 import { getTareaById } from "@/lib/store"
 import type { Tarea, IdeaRoom } from "@/lib/store"
@@ -71,7 +70,6 @@ export default function MiPanelPage() {
       <LiquidBackground />
 
       <div className="relative z-10">
-        <DashboardHeader />
         <PanelHeader />
 
         <main className="container mx-auto p-4 sm:p-6 pb-20">
