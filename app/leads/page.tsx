@@ -5,10 +5,12 @@ import { LeadsHeader } from "@/components/leads/leads-header"
 import { LeadsKanban } from "@/components/leads/leads-kanban"
 import { LeadsFilters, type LeadQuickFilter } from "@/components/leads/leads-filters"
 import { LiquidBackground } from "@/components/liquid-background"
+import { DashboardHeader } from "@/components/dashboard-header"
 import { getLeads, updateLead, deleteLead } from "@/lib/store"
 import type { Lead } from "@/lib/store"
 import { toast } from "sonner"
 import { exportToCSV } from "@/lib/export-csv"
+import { exportLeadesToExcel } from "@/lib/excel-utils"
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([])
@@ -66,7 +68,10 @@ export default function LeadsPage() {
       <LiquidBackground />
 
       <div className="relative z-10">
-        <LeadsHeader onCreated={loadLeads} onExport={() => {
+        <DashboardHeader />
+        <LeadsHeader
+          onCreated={loadLeads}
+          onExportCSV={() => {
             exportToCSV(leads, [
               { key: "nombre", label: "Nombre" },
               { key: "empresa", label: "Empresa" },
@@ -80,8 +85,13 @@ export default function LeadsPage() {
               { key: "fechaCreacion", label: "Fecha Creación" },
               { key: "notas", label: "Notas" },
             ], "leads")
-            toast.success("Leads exportados")
-          }} />
+            toast.success("Leads exportados a CSV")
+          }}
+          onExportExcel={() => {
+            exportLeadesToExcel(leads)
+            toast.success("Leads exportados a Excel")
+          }}
+        />
         <main className="container mx-auto p-6 space-y-6 pb-20">
           <div className="space-y-3 pt-6">
             <h1 className="text-5xl font-bold tracking-tight text-balance text-foreground">

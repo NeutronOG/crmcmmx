@@ -5,11 +5,13 @@ import { ProjectsHeader } from "@/components/projects/projects-header"
 import { ProjectsBoard } from "@/components/projects/projects-board"
 import { ProjectsFilters, type ProjectQuickFilter } from "@/components/projects/projects-filters"
 import { LiquidBackground } from "@/components/liquid-background"
+import { DashboardHeader } from "@/components/dashboard-header"
 import { getProyectos, updateProyecto, deleteProyecto } from "@/lib/store"
 import type { Proyecto } from "@/lib/store"
 import { useAuth } from "@/components/auth-provider"
 import { toast } from "sonner"
 import { exportToCSV } from "@/lib/export-csv"
+import { exportProyectosToExcel } from "@/lib/excel-utils"
 
 export default function ProjectsPage() {
   const { usuario } = useAuth()
@@ -71,7 +73,10 @@ export default function ProjectsPage() {
       <LiquidBackground />
 
       <div className="relative z-10">
-        <ProjectsHeader onCreated={loadProyectos} onExport={() => {
+        <DashboardHeader />
+        <ProjectsHeader
+          onCreated={loadProyectos}
+          onExportCSV={() => {
             exportToCSV(proyectos, [
               { key: "nombre", label: "Nombre" },
               { key: "cliente", label: "Cliente" },
@@ -84,8 +89,13 @@ export default function ProjectsPage() {
               { key: "fechaEntrega", label: "Fecha Entrega" },
               { key: "descripcion", label: "Descripción" },
             ], "proyectos")
-            toast.success("Proyectos exportados")
-          }} />
+            toast.success("Proyectos exportados a CSV")
+          }}
+          onExportExcel={() => {
+            exportProyectosToExcel(proyectos)
+            toast.success("Proyectos exportados a Excel")
+          }}
+        />
         <main className="container mx-auto p-6 space-y-6 pb-20">
           <div className="space-y-3 pt-6">
             <h1 className="text-5xl font-bold tracking-tight text-balance text-foreground">

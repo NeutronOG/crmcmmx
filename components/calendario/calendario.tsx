@@ -5,8 +5,8 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { ChevronLeft, ChevronRight, Plus, X, Clock, Calendar as CalIcon, Users, AlertTriangle, CheckCircle2, Circle, Trash2 } from "lucide-react"
-import { getEventosCalendario, addEventoCalendario, deleteEventoCalendario, getTareasByUsuario, addTarea, crearNotificacion } from "@/lib/store"
+import { ChevronLeft, ChevronRight, Plus, X, Clock, Calendar as CalIcon, Users, AlertTriangle, CheckCircle2, Circle, Trash2, ClipboardList } from "lucide-react"
+import { getEventosCalendario, addEventoCalendario, deleteEventoCalendario, getTareas, addTarea, crearNotificacion } from "@/lib/store"
 import type { EventoCalendario, Tarea } from "@/lib/store"
 import { useAuth } from "@/components/auth-provider"
 import { UserMultiSelect } from "@/components/user-multi-select"
@@ -53,23 +53,26 @@ export function Calendario() {
 
   const load = useCallback(async () => {
     if (!usuario) return
-    const [evts, tareas] = await Promise.all([
+    setLoading(true)
+    // Load ALL calendar events visible to this user (own + as participant)
+    const [evts, todasTareas] = await Promise.all([
       getEventosCalendario(usuario.nombre),
-      getTareasByUsuario(usuario.nombre),
+      getTareas(), // load ALL tasks to show deadlines on calendar
     ])
-    const tareaEvents: EventoCalendario[] = tareas
+    // Convert tasks with due dates into calendar events
+    const tareaEvents: EventoCalendario[] = todasTareas
       .filter(t => t.fechaVencimiento && t.estado !== "Completada")
       .map(t => ({
         id: `tarea-${t.id}`,
         titulo: t.titulo,
-        descripcion: `Tarea: ${t.proyecto || "Sin proyecto"}`,
+        descripcion: `Tarea${t.proyecto ? `: ${t.proyecto}` : ""} — ${t.asignado || "Sin asignar"}`,
         fechaInicio: `${t.fechaVencimiento}T09:00:00`,
         todoElDia: true,
         color: t.prioridad === "Alta" ? "#ef4444" : t.prioridad === "Media" ? "#eab308" : "#22c55e",
         tipo: "tarea",
         importancia: t.prioridad === "Alta" ? "alta" as const : t.prioridad === "Media" ? "media" as const : "baja" as const,
-        usuario: usuario.nombre,
-        participantes: [t.asignado],
+        usuario: t.asignado || usuario.nombre,
+        participantes: t.asignado ? [t.asignado] : [],
         proyecto: t.proyecto,
         tareaId: t.id,
       }))
@@ -209,6 +212,17 @@ export function Calendario() {
 
   const selectedEvents = selectedDate ? getEventosForDate(selectedDate) : []
 
+  // Monthly summary — events/tasks that fall in the current visible month
+  const resumenMes = useMemo(() => {
+    const prefix = `${String(year).padStart(4, "0")}-${String(month + 1).padStart(2, "0")}`
+    const enMes = eventos.filter(e => e.fechaInicio.startsWith(prefix))
+    const urgentes = enMes.filter(e => e.importancia === "alta").length
+    const tareas = enMes.filter(e => e.tipo === "tarea").length
+    const reuniones = enMes.filter(e => e.tipo === "reunion").length
+    const otros = enMes.length - tareas - reuniones
+    return { total: enMes.length, urgentes, tareas, reuniones, otros }
+  }, [eventos, year, month])
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -243,6 +257,48 @@ export function Calendario() {
           <ChevronRight className="size-4" />
         </Button>
       </div>
+
+      {/* Monthly summary */}
+      {!loading && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="rounded-xl p-3 bg-white/5 border border-white/10 flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <CalIcon className="size-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Total {MESES[month]}</p>
+              <p className="text-lg font-bold">{resumenMes.total}</p>
+            </div>
+          </div>
+          <div className="rounded-xl p-3 bg-white/5 border border-white/10 flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
+              <AlertTriangle className="size-4 text-red-400" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Urgentes</p>
+              <p className="text-lg font-bold text-red-400">{resumenMes.urgentes}</p>
+            </div>
+          </div>
+          <div className="rounded-xl p-3 bg-white/5 border border-white/10 flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+              <ClipboardList className="size-4 text-yellow-400" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Tareas</p>
+              <p className="text-lg font-bold text-yellow-400">{resumenMes.tareas}</p>
+            </div>
+          </div>
+          <div className="rounded-xl p-3 bg-white/5 border border-white/10 flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+              <Users className="size-4 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Reuniones</p>
+              <p className="text-lg font-bold text-blue-400">{resumenMes.reuniones}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Calendar grid */}
       <Card className="glass-card rounded-xl overflow-hidden">

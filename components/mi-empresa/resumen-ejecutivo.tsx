@@ -22,7 +22,7 @@ export function ResumenEjecutivo() {
       ([c, p, l, t, i]) => {
         const now = new Date()
         const ingresosMes = i
-          .filter((ing) => ing.mes === now.getMonth() + 1 && ing.año === now.getFullYear())
+          .filter((ing) => { const d = new Date(ing.fecha); return d.getMonth() + 1 === now.getMonth() + 1 && d.getFullYear() === now.getFullYear() })
           .reduce((sum, ing) => sum + ing.monto, 0)
         setData({
           clientes: c.length,

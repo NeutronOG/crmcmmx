@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { Users, Briefcase, Target, DollarSign, Sparkles, FileText, Palette, Video, Percent, UserCheck, ChevronDown, ChevronRight, ClipboardCheck, LogOut, Lightbulb, Calendar, Menu, X, LayoutDashboard, BarChart3 } from "lucide-react"
+import { Users, Briefcase, Target, DollarSign, Sparkles, FileText, Palette, Video, Percent, UserCheck, ChevronDown, ChevronRight, ClipboardCheck, LogOut, Lightbulb, Calendar, Menu, X, LayoutDashboard, BarChart3, User } from "lucide-react"
 import { NotificacionesBell } from "@/components/notificaciones/notificaciones-bell"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useTheme } from "next-themes"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -57,7 +57,6 @@ export function DashboardHeader() {
       label: "Negocio",
       icon: <Sparkles className="size-4" />,
       children: [
-        { label: "Oportunidades", href: "/nuevo-negocio", icon: <Sparkles className="size-4" />, seccion: "nuevo_negocio" },
         { label: "Cotizaciones", href: "/cotizaciones", icon: <FileText className="size-4" />, seccion: "cotizaciones" },
         { label: "Leads", href: "/leads", icon: <Target className="size-4" />, seccion: "leads" },
         { label: "Clientes", href: "/clients", icon: <Users className="size-4" />, seccion: "clientes" },
@@ -197,6 +196,7 @@ export function DashboardHeader() {
                   className="relative size-8 rounded-full hover:ring-2 hover:ring-white/30 transition-all duration-300"
                 >
                   <Avatar className="size-8 ring-2 ring-white/20">
+                    {usuario?.avatar && <AvatarImage src={usuario.avatar} />}
                     <AvatarFallback className="bg-white text-black font-bold text-xs">{initials}</AvatarFallback>
                   </Avatar>
                 </button>
@@ -213,6 +213,14 @@ export function DashboardHeader() {
                       )}
                     </div>
                     <div className="py-1.5">
+                      <Link
+                        href="/mi-perfil"
+                        onClick={() => setExpandedGroup(null)}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+                      >
+                        <User className="size-3.5" />
+                        Mi Perfil
+                      </Link>
                       <button
                         onClick={() => { logout(); setExpandedGroup(null) }}
                         className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium satin-red hover:satin-red-bg transition-colors"
@@ -304,6 +312,7 @@ export function DashboardHeader() {
                 <div className="pt-2 mt-2 border-t border-white/10">
                   <div className="flex items-center gap-3 px-3 py-2">
                     <Avatar className="size-8 ring-2 ring-white/20">
+                      {usuario?.avatar && <AvatarImage src={usuario.avatar} />}
                       <AvatarFallback className="bg-white text-black font-bold text-xs">{initials}</AvatarFallback>
                     </Avatar>
                     <div>
@@ -311,6 +320,14 @@ export function DashboardHeader() {
                       <p className="text-[10px] text-white/50">{usuario?.email}</p>
                     </div>
                   </div>
+                  <Link
+                    href="/mi-perfil"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <User className="size-4" />
+                    Mi Perfil
+                  </Link>
                   <button
                     onClick={() => { logout(); setMobileOpen(false) }}
                     className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium satin-red hover:satin-red-bg transition-colors"
