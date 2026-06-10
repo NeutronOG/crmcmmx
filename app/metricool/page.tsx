@@ -6,6 +6,9 @@ import { LiquidBackground } from "@/components/liquid-background"
 import { MetricoolHeader } from "@/components/metricool/metricool-header"
 import { MetricoolStats } from "@/components/metricool/metricool-stats"
 import { MetricoolPosts } from "@/components/metricool/metricool-posts"
+import { MetricoolCampaigns } from "@/components/metricool/metricool-campaigns"
+import { MetricoolNetworks } from "@/components/metricool/metricool-networks"
+import { MetricoolBestTimes } from "@/components/metricool/metricool-best-times"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 function getDateRange(days: number) {
@@ -14,11 +17,26 @@ function getDateRange(days: number) {
   return { from, to }
 }
 
+async function safeFetch(url: string) {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    return await res.json()
+  } catch {
+    return null
+  }
+}
+
 export default function MetricoolPage() {
   const [dateRange, setDateRange] = useState(getDateRange(30))
   const [analyticsData, setAnalyticsData] = useState<Record<string, unknown> | null>(null)
-  const [publishedData, setPublishedData] = useState<Record<string, unknown> | null>(null)
-  const [scheduledData, setScheduledData] = useState<Record<string, unknown> | null>(null)
+  const [postsData, setPostsData] = useState<Record<string, unknown> | null>(null)
+  const [campaignsData, setCampaignsData] = useState<Record<string, unknown> | null>(null)
+  const [instagramData, setInstagramData] = useState<Record<string, unknown> | null>(null)
+  const [facebookData, setFacebookData] = useState<Record<string, unknown> | null>(null)
+  const [tiktokData, setTiktokData] = useState<Record<string, unknown> | null>(null)
+  const [linkedinData, setLinkedinData] = useState<Record<string, unknown> | null>(null)
+  const [bestTimesData, setBestTimesData] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,12 +44,26 @@ export default function MetricoolPage() {
     setLoading(true)
     setError(null)
     try {
-      const params = new URLSearchParams({ from: dateRange.from, to: dateRange.to })
+      const p = new URLSearchParams({ from: dateRange.from, to: dateRange.to })
 
-      const [analyticsRes, publishedRes, scheduledRes] = await Promise.all([
-        fetch(`/api/metricool/stats?endpoint=analytics&${params}`),
-        fetch(`/api/metricool/stats?endpoint=posts/published&${params}`),
-        fetch(`/api/metricool/stats?endpoint=posts/scheduled&${params}`),
+      const [
+        analyticsRes,
+        postsRes,
+        campaignsRes,
+        instagramRes,
+        facebookRes,
+        tiktokRes,
+        linkedinRes,
+        bestTimesRes,
+      ] = await Promise.all([
+        fetch(`/api/metricool/stats?endpoint=analytics&${p}`),
+        safeFetch(`/api/metricool/stats?endpoint=posts&${p}`),
+        safeFetch(`/api/metricool/stats?endpoint=campaigns&${p}`),
+        safeFetch(`/api/metricool/stats?endpoint=instagram&${p}`),
+        safeFetch(`/api/metricool/stats?endpoint=facebook&${p}`),
+        safeFetch(`/api/metricool/stats?endpoint=tiktok&${p}`),
+        safeFetch(`/api/metricool/stats?endpoint=linkedin&${p}`),
+        safeFetch(`/api/metricool/stats?endpoint=besttimes&${p}`),
       ])
 
       if (!analyticsRes.ok) {
@@ -41,9 +73,14 @@ export default function MetricoolPage() {
         setAnalyticsData(await analyticsRes.json())
       }
 
-      if (publishedRes.ok) setPublishedData(await publishedRes.json())
-      if (scheduledRes.ok) setScheduledData(await scheduledRes.json())
-    } catch (e) {
+      setPostsData(postsRes)
+      setCampaignsData(campaignsRes)
+      setInstagramData(instagramRes)
+      setFacebookData(facebookRes)
+      setTiktokData(tiktokRes)
+      setLinkedinData(linkedinRes)
+      setBestTimesData(bestTimesRes)
+    } catch {
       setError("Error de conexión con Metricool")
     } finally {
       setLoading(false)
@@ -80,19 +117,40 @@ export default function MetricoolPage() {
           <Tabs defaultValue="overview">
             <TabsList className="bg-muted/50">
               <TabsTrigger value="overview">Resumen</TabsTrigger>
+              <TabsTrigger value="networks">Redes Sociales</TabsTrigger>
+              <TabsTrigger value="campaigns">Campañas</TabsTrigger>
               <TabsTrigger value="posts">Publicaciones</TabsTrigger>
+              <TabsTrigger value="besttimes">Mejores Horarios</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-6">
               <MetricoolStats data={analyticsData} loading={loading} error={error} />
             </TabsContent>
 
-            <TabsContent value="posts" className="mt-6">
-              <MetricoolPosts
-                data={publishedData}
-                scheduledData={scheduledData}
+            <TabsContent value="networks" className="mt-6">
+              <MetricoolNetworks
+                instagram={instagramData}
+                facebook={facebookData}
+                tiktok={tiktokData}
+                linkedin={linkedinData}
                 loading={loading}
               />
+            </TabsContent>
+
+            <TabsContent value="campaigns" className="mt-6">
+              <MetricoolCampaigns data={campaignsData} loading={loading} />
+            </TabsContent>
+
+            <TabsContent value="posts" className="mt-6">
+              <MetricoolPosts
+                data={postsData}
+                scheduledData={null}
+                loading={loading}
+              />
+            </TabsContent>
+
+            <TabsContent value="besttimes" className="mt-6">
+              <MetricoolBestTimes data={bestTimesData} loading={loading} />
             </TabsContent>
           </Tabs>
         </main>
