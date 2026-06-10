@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { ArrowLeft, Send, Paperclip, Users, FileText, Image as ImageIcon, Download, Loader2, X } from "lucide-react"
+import { ArrowLeft, Send, Paperclip, Users, FileText, Image as ImageIcon, Download, Loader2, X, Video } from "lucide-react"
 import { getIdeaRoomMensajes, sendIdeaRoomMensaje, uploadIdeaRoomFile, crearNotificacion } from "@/lib/store"
 import type { IdeaRoom, IdeaRoomMensaje } from "@/lib/store"
 import { useAuth } from "@/components/auth-provider"
@@ -17,6 +17,7 @@ interface IdeaRoomChatProps {
 }
 
 const isImageFile = (name: string) => /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i.test(name)
+const isVideoFile = (name: string) => /\.(mp4|mov|avi|webm|mkv|m4v)$/i.test(name)
 
 const URL_PATTERN = /(https?:\/\/[^\s<]+[^\s<.,;:!?"'()\[\]{}])/g
 
@@ -111,15 +112,16 @@ export function IdeaRoomChat({ room, onBack }: IdeaRoomChatProps) {
         for (const file of pendingFiles) {
           const { url, nombre } = await uploadIdeaRoomFile(room.id, file)
           const isImg = isImageFile(nombre)
+          const isVid = isVideoFile(nombre)
           await sendIdeaRoomMensaje({
             ideaRoomId: room.id,
             autor: usuario.nombre,
             contenido: texto.trim() || nombre,
-            tipo: isImg ? "imagen" : "archivo",
+            tipo: isImg ? "imagen" : isVid ? "video" : "archivo",
             archivoUrl: url,
             archivoNombre: nombre,
           })
-          await notifyParticipants(isImg ? `📷 ${nombre}` : `📎 ${nombre}`)
+          await notifyParticipants(isImg ? `📷 ${nombre}` : isVid ? `🎬 ${nombre}` : `📎 ${nombre}`)
         }
         // If there was also text and multiple files, send text separately
         if (texto.trim() && pendingFiles.length > 0) {
@@ -199,6 +201,22 @@ export function IdeaRoomChat({ room, onBack }: IdeaRoomChatProps) {
               className="max-w-[240px] max-h-[200px] rounded-lg object-cover hover:opacity-90 transition-opacity cursor-pointer"
             />
           </a>
+          {msg.contenido && msg.contenido !== msg.archivoNombre && (
+            <p><Linkify>{msg.contenido}</Linkify></p>
+          )}
+        </div>
+      )
+    }
+
+    if (msg.tipo === "video" && msg.archivoUrl) {
+      return (
+        <div className="space-y-1.5">
+          <video
+            src={msg.archivoUrl}
+            controls
+            className="max-w-[280px] max-h-[200px] rounded-lg"
+            preload="metadata"
+          />
           {msg.contenido && msg.contenido !== msg.archivoNombre && (
             <p><Linkify>{msg.contenido}</Linkify></p>
           )}
@@ -301,6 +319,8 @@ export function IdeaRoomChat({ room, onBack }: IdeaRoomChatProps) {
             <div key={idx} className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-xs">
               {isImageFile(file.name) ? (
                 <ImageIcon className="size-3 satin-blue" />
+              ) : isVideoFile(file.name) ? (
+                <Video className="size-3 satin-blue" />
               ) : (
                 <FileText className="size-3 satin-blue" />
               )}
@@ -321,7 +341,7 @@ export function IdeaRoomChat({ room, onBack }: IdeaRoomChatProps) {
           multiple
           className="hidden"
           onChange={handleFileSelect}
-          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.ai,.psd,.fig,.sketch,.mp4,.mov"
+          accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.ai,.psd,.fig,.sketch"
         />
         <div className="flex items-center gap-2">
           <Button

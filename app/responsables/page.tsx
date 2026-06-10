@@ -5,6 +5,7 @@ import { LiquidBackground } from "@/components/liquid-background"
 import { ResponsablesList } from "@/components/responsables/responsables-list"
 import { ResponsablesStats } from "@/components/responsables/responsables-stats"
 import { ResponsablesAsignaciones } from "@/components/responsables/responsables-asignaciones"
+import { ResponsablesOcupacion } from "@/components/responsables/responsables-ocupacion"
 
 export default function ResponsablesPage() {
   return (
@@ -24,6 +25,7 @@ export default function ResponsablesPage() {
           </div>
 
           <ResponsablesStats />
+          <ResponsablesOcupacion />
           <ResponsablesAsignaciones />
           <ResponsablesList />
         </main>

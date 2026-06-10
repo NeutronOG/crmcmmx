@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { Users, Briefcase, Target, DollarSign, Sparkles, FileText, Palette, Video, Percent, UserCheck, ChevronDown, ChevronRight, ClipboardCheck, LogOut, Lightbulb, Calendar, Menu, X, LayoutDashboard, BarChart3, User } from "lucide-react"
+import { Users, Briefcase, Target, DollarSign, Sparkles, FileText, Palette, Video, Percent, UserCheck, ChevronDown, ChevronRight, ClipboardCheck, LogOut, Lightbulb, Calendar, Menu, X, LayoutDashboard, BarChart3, User, HardDrive, BarChart2 } from "lucide-react"
 import { NotificacionesBell } from "@/components/notificaciones/notificaciones-bell"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useTheme } from "next-themes"
@@ -83,6 +83,15 @@ export function DashboardHeader() {
       ],
     },
     { label: "Reportes", href: "/reports", icon: <BarChart3 className="size-4" />, seccion: "reportes" },
+    {
+      label: "Herramientas",
+      icon: <Sparkles className="size-4" />,
+      children: [
+        { label: "Google Drive", href: "/drive", icon: <HardDrive className="size-4" />, seccion: "drive" },
+        { label: "Metricool", href: "/metricool", icon: <BarChart2 className="size-4" />, seccion: "metricool" },
+      ],
+    },
+    // { label: "Videollamadas", href: "/videollamadas", icon: <PhoneCall className="size-4" />, seccion: "videollamadas" },
   ]
 
   // Filter items by permission

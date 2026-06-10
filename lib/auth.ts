@@ -78,6 +78,9 @@ export type Seccion =
   | "mi_empresa"
   | "idea_room"
   | "calendario"
+  | "videollamadas"
+  | "drive"
+  | "metricool"
 
 export const seccionesLabels: Record<Seccion, string> = {
   dashboard: "Dashboard",
@@ -97,6 +100,9 @@ export const seccionesLabels: Record<Seccion, string> = {
   mi_empresa: "Mi Empresa",
   idea_room: "Idea Room",
   calendario: "Calendario",
+  videollamadas: "Videollamadas",
+  drive: "Google Drive",
+  metricool: "Metricool",
 }
 
 // Mapa de permisos: qué secciones puede ver cada rol
@@ -105,33 +111,39 @@ export const permisosPorRol: Record<Rol, Seccion[]> = {
     "dashboard", "nuevo_negocio", "cotizaciones", "leads", "clientes",
     "proyectos", "creadores", "responsables", "tareas",
     "facturacion", "nomina", "reportes", "comunicaciones",
-    "idea_room", "calendario", "mi_empresa",
+    "idea_room", "calendario", "mi_empresa", "videollamadas",
+    "drive", "metricool",
   ],
   dueno: [
     "dashboard", "reportes", "facturacion", "nomina",
     "clientes", "proyectos", "cotizaciones", "leads",
-    "mi_empresa", "calendario", "idea_room",
+    "mi_empresa", "calendario", "idea_room", "videollamadas",
+    "drive", "metricool",
   ],
   ejecutivo_cuenta: [
     "dashboard", "leads", "clientes", "proyectos", "cotizaciones",
-    "nuevo_negocio", "tareas", "calendario", "comunicaciones", "idea_room",
+    "nuevo_negocio", "tareas", "calendario", "comunicaciones", "idea_room", "videollamadas",
+    "drive", "metricool",
   ],
   coord_diseno: [
     "dashboard", "proyectos", "tareas", "clientes",
-    "calendario", "idea_room", "comunicaciones",
+    "calendario", "idea_room", "comunicaciones", "videollamadas",
+    "drive", "metricool",
   ],
   coord_mkt: [
     "dashboard", "leads", "clientes", "proyectos", "tareas",
-    "cotizaciones", "nuevo_negocio", "calendario", "comunicaciones", "idea_room", "creadores",
+    "cotizaciones", "nuevo_negocio", "calendario", "comunicaciones", "idea_room", "creadores", "videollamadas",
+    "drive", "metricool",
   ],
   aux_mkt: [
-    "dashboard", "tareas", "proyectos", "calendario", "comunicaciones", "idea_room",
+    "dashboard", "tareas", "proyectos", "calendario", "comunicaciones", "idea_room", "videollamadas",
+    "drive", "metricool",
   ],
   contabilidad: [
-    "dashboard", "facturacion", "nomina", "reportes", "clientes", "calendario",
+    "dashboard", "facturacion", "nomina", "reportes", "clientes", "calendario", "videollamadas",
   ],
   ia: [
-    "dashboard", "tareas", "proyectos", "idea_room", "calendario",
+    "dashboard", "tareas", "proyectos", "idea_room", "calendario", "videollamadas",
   ],
   disenador: ["mi_panel", "tareas", "calendario"],
   diseñador_grafico: [
@@ -160,7 +172,7 @@ export const permisosPorRol: Record<Rol, Seccion[]> = {
   ],
   administracion: [
     "dashboard", "clientes", "proyectos", "responsables",
-    "calendario", "idea_room", "reportes", "leads", "mi_empresa",
+    "calendario", "idea_room", "reportes", "leads", "mi_empresa", "videollamadas",
   ],
   tareas: [
     "mi_panel",
@@ -192,6 +204,9 @@ export const seccionRutas: Record<Seccion, string> = {
   mi_empresa: "/mi-empresa",
   idea_room: "/idea-room",
   calendario: "/calendario",
+  videollamadas: "/videollamadas",
+  drive: "/drive",
+  metricool: "/metricool",
 }
 
 // Mapa inverso: ruta a sección

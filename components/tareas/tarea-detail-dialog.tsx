@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Calendar,
   Building2,
@@ -26,9 +28,12 @@ import {
   CheckCircle2,
   Clock,
   Eye,
+  ListChecks,
+  Plus,
+  Underline,
 } from "lucide-react"
-import type { Tarea, Evidencia } from "@/lib/store"
-import { addEvidencia, removeEvidencia, updateTarea } from "@/lib/store"
+import type { Tarea, Evidencia, Subtarea } from "@/lib/store"
+import { addEvidencia, removeEvidencia, updateTarea, addSubtarea, updateSubtarea, deleteSubtarea, getSubtareas } from "@/lib/store"
 import { toast } from "sonner"
 
 interface TareaDetailDialogProps {
@@ -41,7 +46,65 @@ interface TareaDetailDialogProps {
 export function TareaDetailDialog({ tarea, open, onOpenChange, onUpdate }: TareaDetailDialogProps) {
   const [uploading, setUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [nuevaSubtarea, setNuevaSubtarea] = useState("")
+  const [savingSubtarea, setSavingSubtarea] = useState(false)
+  const [subtareas, setSubtareas] = useState<Subtarea[]>(tarea?.subtareas || [])
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Sync subtareas when tarea changes
+  const tareaId = tarea?.id
+  const tareaSubtareas = tarea?.subtareas
+  if (tarea && tarea.subtareas !== subtareas && tareaSubtareas) {
+    // only update if the tarea id changes (avoid infinite loop)
+  }
+
+  const reloadSubtareas = async () => {
+    if (!tarea) return
+    const data = await getSubtareas(tarea.id)
+    setSubtareas(data)
+  }
+
+  const handleAddSubtarea = async () => {
+    if (!tarea || !nuevaSubtarea.trim()) return
+    setSavingSubtarea(true)
+    try {
+      const sub = await addSubtarea(tarea.id, nuevaSubtarea)
+      setSubtareas(prev => [...prev, sub])
+      setNuevaSubtarea("")
+    } catch {
+      // silently fail, subtareas table may not exist yet
+    } finally {
+      setSavingSubtarea(false)
+    }
+  }
+
+  const handleToggleSubtarea = async (sub: Subtarea) => {
+    try {
+      await updateSubtarea(sub.id, { completada: !sub.completada })
+      setSubtareas(prev => prev.map(s => s.id === sub.id ? { ...s, completada: !s.completada } : s))
+    } catch {
+      // silently fail
+    }
+  }
+
+  const handleDeleteSubtarea = async (id: string) => {
+    try {
+      await deleteSubtarea(id)
+      setSubtareas(prev => prev.filter(s => s.id !== id))
+    } catch {
+      // silently fail
+    }
+  }
+
+  const handleToggleSubrayado = async () => {
+    if (!tarea) return
+    try {
+      await updateTarea(tarea.id, { tituloSubrayado: !tarea.tituloSubrayado })
+      onUpdate()
+    } catch {
+      // silently fail
+    }
+  }
 
   if (!tarea) return null
 
@@ -157,13 +220,30 @@ export function TareaDetailDialog({ tarea, open, onOpenChange, onUpdate }: Tarea
                 </Badge>
               )}
             </div>
-            <DialogTitle className="text-xl">{tarea.titulo}</DialogTitle>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <span className={tarea.tituloSubrayado ? "underline underline-offset-4 decoration-primary" : ""}>
+                {tarea.titulo}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`h-7 w-7 shrink-0 ${tarea.tituloSubrayado ? "text-primary" : "text-muted-foreground"}`}
+                onClick={handleToggleSubrayado}
+                title="Subrayar título"
+              >
+                <Underline className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
             <DialogDescription>{tarea.id}</DialogDescription>
           </DialogHeader>
 
           <Tabs defaultValue="detalles" className="mt-2">
             <TabsList className="w-full">
               <TabsTrigger value="detalles" className="flex-1">Detalles</TabsTrigger>
+              <TabsTrigger value="subtareas" className="flex-1 gap-1">
+                <ListChecks className="h-3 w-3" />
+                Subtareas ({subtareas.length})
+              </TabsTrigger>
               <TabsTrigger value="evidencias" className="flex-1 gap-1">
                 <Paperclip className="h-3 w-3" />
                 Evidencias ({tarea.evidencias.length})
@@ -270,6 +350,80 @@ export function TareaDetailDialog({ tarea, open, onOpenChange, onUpdate }: Tarea
                   ))}
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="subtareas" className="space-y-4 mt-4">
+              {/* Agregar nueva subtarea */}
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Agregar subtarea..."
+                  value={nuevaSubtarea}
+                  onChange={e => setNuevaSubtarea(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleAddSubtarea() } }}
+                  className="flex-1"
+                />
+                <Button
+                  size="sm"
+                  onClick={handleAddSubtarea}
+                  disabled={savingSubtarea || !nuevaSubtarea.trim()}
+                  className="gap-1"
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar
+                </Button>
+              </div>
+
+              {subtareas.length === 0 ? (
+                <div className="text-center py-8">
+                  <ListChecks className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
+                  <p className="text-sm text-muted-foreground">No hay subtareas</p>
+                  <p className="text-xs text-muted-foreground mt-1">Divide esta tarea en pasos más pequeños</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {/* Barra de progreso de subtareas */}
+                  {subtareas.length > 0 && (
+                    <div className="space-y-1 mb-3">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>{subtareas.filter(s => s.completada).length} de {subtareas.length} completadas</span>
+                        <span>{Math.round((subtareas.filter(s => s.completada).length / subtareas.length) * 100)}%</span>
+                      </div>
+                      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className="h-full satin-green-bg rounded-full transition-all duration-500"
+                          style={{ width: `${Math.round((subtareas.filter(s => s.completada).length / subtareas.length) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {subtareas.map(sub => (
+                    <div
+                      key={sub.id}
+                      className="flex items-center gap-3 p-3 rounded-lg glass-subtle hover:bg-white/10 transition-colors group"
+                    >
+                      <Checkbox
+                        id={`sub-${sub.id}`}
+                        checked={sub.completada}
+                        onCheckedChange={() => handleToggleSubtarea(sub)}
+                      />
+                      <label
+                        htmlFor={`sub-${sub.id}`}
+                        className={`flex-1 text-sm cursor-pointer ${sub.completada ? "line-through text-muted-foreground" : ""}`}
+                      >
+                        {sub.titulo}
+                      </label>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                        onClick={() => handleDeleteSubtarea(sub.id)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="evidencias" className="space-y-4 mt-4">

@@ -34,23 +34,27 @@ export function NuevoProyectoDialog({ open, onOpenChange, onCreated }: NuevoProy
   const [nombre, setNombre] = useState("")
   const [cliente, setCliente] = useState("")
   const [tipo, setTipo] = useState("Marketing Digital")
-  const [estado, setEstado] = useState<"Planificación" | "En Progreso">("Planificación")
+  const [estado, setEstado] = useState<"Brief" | "Propuesta" | "Planificación" | "En Progreso">("Brief")
   const [fechaInicio, setFechaInicio] = useState("")
   const [fechaEntrega, setFechaEntrega] = useState("")
   const [presupuesto, setPresupuesto] = useState("")
   const [responsable, setResponsable] = useState<string[]>([])
   const [descripcion, setDescripcion] = useState("")
+  const [driveUrl, setDriveUrl] = useState("")
+  const [videollamadaUrl, setVideollamadaUrl] = useState("")
 
   const resetForm = () => {
     setNombre("")
     setCliente("")
     setTipo("Marketing Digital")
-    setEstado("Planificación")
+    setEstado("Brief")
     setFechaInicio("")
     setFechaEntrega("")
     setPresupuesto("")
     setResponsable([])
     setDescripcion("")
+    setDriveUrl("")
+    setVideollamadaUrl("")
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,6 +80,8 @@ export function NuevoProyectoDialog({ open, onOpenChange, onCreated }: NuevoProy
         responsable: responsable.join(", "),
         progreso: 0,
         descripcion: descripcion.trim(),
+        driveUrl: driveUrl.trim(),
+        videollamadaUrl: videollamadaUrl.trim(),
       })
       toast.success("Proyecto creado exitosamente")
       // Projects with budget go directly to Guillermo (dueño)
@@ -129,6 +135,11 @@ export function NuevoProyectoDialog({ open, onOpenChange, onCreated }: NuevoProy
                   <SelectItem value="Desarrollo Web">Desarrollo Web</SelectItem>
                   <SelectItem value="Google Ads">Google Ads</SelectItem>
                   <SelectItem value="Estrategia">Estrategia</SelectItem>
+                  <SelectItem value="Experiencias">Experiencias</SelectItem>
+                  <SelectItem value="Stands">Stands</SelectItem>
+                  <SelectItem value="Campaña">Campaña</SelectItem>
+                  <SelectItem value="Licitación">Licitación</SelectItem>
+                  <SelectItem value="Otros">Otros</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -140,6 +151,8 @@ export function NuevoProyectoDialog({ open, onOpenChange, onCreated }: NuevoProy
               <Select value={estado} onValueChange={(v) => setEstado(v as typeof estado)}>
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="Brief">Brief</SelectItem>
+                  <SelectItem value="Propuesta">Propuesta</SelectItem>
                   <SelectItem value="Planificación">Planificación</SelectItem>
                   <SelectItem value="En Progreso">En Progreso</SelectItem>
                 </SelectContent>
@@ -170,6 +183,17 @@ export function NuevoProyectoDialog({ open, onOpenChange, onCreated }: NuevoProy
           <div className="space-y-2">
             <Label htmlFor="descripcion">Descripción</Label>
             <Textarea id="descripcion" placeholder="Describe el proyecto..." value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={2} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="driveUrl">Google Drive (URL)</Label>
+              <Input id="driveUrl" type="url" placeholder="https://drive.google.com/..." value={driveUrl} onChange={(e) => setDriveUrl(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="videollamadaUrl">Videollamada cliente (URL)</Label>
+              <Input id="videollamadaUrl" type="url" placeholder="https://meet.google.com/..." value={videollamadaUrl} onChange={(e) => setVideollamadaUrl(e.target.value)} />
+            </div>
           </div>
 
           <DialogFooter>

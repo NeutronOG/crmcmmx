@@ -65,8 +65,9 @@ export function CreadoresList({ creadores, calificaciones, onRate, onDelete }: C
                         {creador.nombre}
                       </h4>
                       {creador.email && <p className="text-sm text-muted-foreground">{creador.email}</p>}
-                      <div className="flex items-center gap-2 mt-1">
-                        {creador.especialidad && (
+                      <div className="flex items-center gap-2 mt-1">                          {creador.tipo && (
+                            <Badge variant="secondary" className="text-xs">{creador.tipo}</Badge>
+                          )}                        {creador.especialidad && (
                           <Badge variant="outline" className="text-xs">{creador.especialidad}</Badge>
                         )}
                         {creador.tarifa && (

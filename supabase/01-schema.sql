@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+
 ALTER TABLE usuarios ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Usuarios visibles para autenticados" ON usuarios FOR SELECT USING (true);
 CREATE POLICY "Admin puede modificar usuarios" ON usuarios FOR ALL USING (true);

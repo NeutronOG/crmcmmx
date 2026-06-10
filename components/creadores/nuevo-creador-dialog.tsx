@@ -24,6 +24,7 @@ interface NuevoCreadorDialogProps {
 export function NuevoCreadorDialog({ open, onOpenChange, onCreated }: NuevoCreadorDialogProps) {
   const [nombre, setNombre] = useState("")
   const [email, setEmail] = useState("")
+  const [tipo, setTipo] = useState("Freelancer")
   const [especialidad, setEspecialidad] = useState("")
   const [tarifa, setTarifa] = useState("")
   const [estado, setEstado] = useState("Disponible")
@@ -34,9 +35,9 @@ export function NuevoCreadorDialog({ open, onOpenChange, onCreated }: NuevoCread
     if (!nombre.trim()) return
     setSaving(true)
     try {
-      await addCreador({ nombre: nombre.trim(), email: email.trim(), especialidad: especialidad.trim(), tarifa: tarifa.trim(), estado })
+      await addCreador({ nombre: nombre.trim(), email: email.trim(), tipo, especialidad: especialidad.trim(), tarifa: tarifa.trim(), estado })
       toast.success("Creador agregado")
-      setNombre(""); setEmail(""); setEspecialidad(""); setTarifa(""); setEstado("Disponible")
+      setNombre(""); setEmail(""); setTipo("Freelancer"); setEspecialidad(""); setTarifa(""); setEstado("Disponible")
       onOpenChange(false)
       onCreated()
     } catch {
@@ -60,6 +61,16 @@ export function NuevoCreadorDialog({ open, onOpenChange, onCreated }: NuevoCread
           <div className="space-y-2">
             <Label>Email</Label>
             <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="correo@ejemplo.com" type="email" />
+          </div>
+          <div className="space-y-2">
+            <Label>Tipo *</Label>
+            <Select value={tipo} onValueChange={setTipo}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Freelancer">Freelancer</SelectItem>
+                <SelectItem value="Medición de Contenido">Medición de Contenido</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label>Especialidad</Label>

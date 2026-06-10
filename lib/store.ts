@@ -43,13 +43,15 @@ export interface Proyecto {
   nombre: string
   cliente: string
   tipo: string
-  estado: "Planificación" | "En Progreso" | "En Revisión" | "Completado" | "Pausado"
+  estado: "Brief" | "Propuesta" | "Planificación" | "Revisión Interna" | "Revisión Cliente" | "En Progreso" | "En Revisión" | "Completado" | "Pausado"
   fechaInicio: string
   fechaEntrega: string
   presupuesto: number
   responsable: string
   progreso: number
   descripcion: string
+  driveUrl: string
+  videollamadaUrl: string
 }
 
 export interface Empleado {
@@ -103,9 +105,18 @@ export interface Evidencia {
   tamaño: number
 }
 
+export interface Subtarea {
+  id: string
+  tareaId: string
+  titulo: string
+  completada: boolean
+  createdAt: string
+}
+
 export interface Tarea {
   id: string
   titulo: string
+  tituloSubrayado: boolean
   descripcion: string
   proyecto: string
   cliente: string
@@ -117,6 +128,7 @@ export interface Tarea {
   fechaCompletada: string
   evidencias: Evidencia[]
   etiquetas: string[]
+  subtareas: Subtarea[]
 }
 
 // =============================================
@@ -171,6 +183,8 @@ function mapProyecto(row: any): Proyecto {
     responsable: row.responsable || '',
     progreso: Number(row.progreso) || 0,
     descripcion: row.descripcion || '',
+    driveUrl: row.drive_url || '',
+    videollamadaUrl: row.videollamada_url || '',
   }
 }
 
@@ -233,10 +247,21 @@ function mapEvidencia(row: any): Evidencia {
   }
 }
 
-function mapTarea(row: any, evidencias: Evidencia[] = []): Tarea {
+function mapSubtarea(row: any): Subtarea {
+  return {
+    id: row.id,
+    tareaId: row.tarea_id,
+    titulo: row.titulo,
+    completada: row.completada || false,
+    createdAt: row.created_at,
+  }
+}
+
+function mapTarea(row: any, evidencias: Evidencia[] = [], subtareas: Subtarea[] = []): Tarea {
   return {
     id: row.id,
     titulo: row.titulo,
+    tituloSubrayado: row.titulo_subrayado || false,
     descripcion: row.descripcion || '',
     proyecto: row.proyecto || '',
     cliente: row.cliente || '',
@@ -248,6 +273,7 @@ function mapTarea(row: any, evidencias: Evidencia[] = []): Tarea {
     fechaCompletada: row.fecha_completada || '',
     evidencias,
     etiquetas: row.etiquetas || [],
+    subtareas,
   }
 }
 
@@ -374,6 +400,8 @@ export async function addProyecto(proyecto: Omit<Proyecto, 'id'>): Promise<Proye
     responsable: proyecto.responsable,
     progreso: proyecto.progreso,
     descripcion: proyecto.descripcion,
+    drive_url: proyecto.driveUrl || null,
+    videollamada_url: proyecto.videollamadaUrl || null,
   }).select().single()
   if (error) throw error
   return mapProyecto(data)
@@ -391,6 +419,8 @@ export async function updateProyecto(id: string, updates: Partial<Proyecto>): Pr
   if (updates.responsable !== undefined) mapped.responsable = updates.responsable
   if (updates.progreso !== undefined) mapped.progreso = updates.progreso
   if (updates.descripcion !== undefined) mapped.descripcion = updates.descripcion
+  if (updates.driveUrl !== undefined) mapped.drive_url = updates.driveUrl || null
+  if (updates.videollamadaUrl !== undefined) mapped.videollamada_url = updates.videollamadaUrl || null
   const { error } = await supabase.from('proyectos').update(mapped).eq('id', id)
   if (error) throw error
 }
@@ -552,6 +582,7 @@ export async function getTareas(): Promise<Tarea[]> {
 
   const tareaIds = (tareasData || []).map(t => t.id)
   let evidenciasMap: Record<string, Evidencia[]> = {}
+  let subtareasMap: Record<string, Subtarea[]> = {}
 
   if (tareaIds.length > 0) {
     const { data: eviData } = await supabase
@@ -563,9 +594,18 @@ export async function getTareas(): Promise<Tarea[]> {
         evidenciasMap[row.tarea_id].push(evi)
       }
     }
+    const { data: subData } = await supabase
+      .from('subtareas').select('*').in('tarea_id', tareaIds).order('created_at', { ascending: true })
+    if (subData) {
+      for (const row of subData) {
+        const sub = mapSubtarea(row)
+        if (!subtareasMap[row.tarea_id]) subtareasMap[row.tarea_id] = []
+        subtareasMap[row.tarea_id].push(sub)
+      }
+    }
   }
 
-  return (tareasData || []).map(row => mapTarea(row, evidenciasMap[row.id] || []))
+  return (tareasData || []).map(row => mapTarea(row, evidenciasMap[row.id] || [], subtareasMap[row.id] || []))
 }
 
 export async function getTareaById(id: string): Promise<Tarea | null> {
@@ -575,12 +615,16 @@ export async function getTareaById(id: string): Promise<Tarea | null> {
   const { data: eviData } = await supabase.from('evidencias').select('*').eq('tarea_id', id)
   const evidencias = (eviData || []).map(mapEvidencia)
 
-  return mapTarea(data, evidencias)
+  const { data: subData } = await supabase.from('subtareas').select('*').eq('tarea_id', id).order('created_at', { ascending: true })
+  const subtareas = (subData || []).map(mapSubtarea)
+
+  return mapTarea(data, evidencias, subtareas)
 }
 
-export async function addTarea(tarea: Omit<Tarea, 'id' | 'evidencias'>): Promise<Tarea> {
+export async function addTarea(tarea: Omit<Tarea, 'id' | 'evidencias' | 'subtareas'>): Promise<Tarea> {
   const { data, error } = await supabase.from('tareas').insert({
     titulo: tarea.titulo,
+    titulo_subrayado: tarea.tituloSubrayado || false,
     descripcion: tarea.descripcion,
     proyecto: tarea.proyecto,
     cliente: tarea.cliente,
@@ -593,7 +637,7 @@ export async function addTarea(tarea: Omit<Tarea, 'id' | 'evidencias'>): Promise
     etiquetas: tarea.etiquetas,
   }).select().single()
   if (error) throw error
-  return mapTarea(data, [])
+  return mapTarea(data, [], [])
 }
 
 export async function updateTarea(id: string, updates: Partial<Tarea>): Promise<void> {
@@ -605,6 +649,7 @@ export async function updateTarea(id: string, updates: Partial<Tarea>): Promise<
   if (updates.asignado !== undefined) mapped.asignado = updates.asignado
   if (updates.estado !== undefined) mapped.estado = updates.estado
   if (updates.prioridad !== undefined) mapped.prioridad = updates.prioridad
+  if (updates.tituloSubrayado !== undefined) mapped.titulo_subrayado = updates.tituloSubrayado
   if (updates.fechaVencimiento !== undefined) mapped.fecha_vencimiento = updates.fechaVencimiento || null
   if (updates.fechaCompletada !== undefined) mapped.fecha_completada = updates.fechaCompletada || null
   if (updates.etiquetas !== undefined) mapped.etiquetas = updates.etiquetas
@@ -614,6 +659,40 @@ export async function updateTarea(id: string, updates: Partial<Tarea>): Promise<
 
 export async function deleteTarea(id: string): Promise<void> {
   const { error } = await supabase.from('tareas').delete().eq('id', id)
+  if (error) throw error
+}
+
+// =============================================
+// SUBTAREAS
+// =============================================
+
+export async function getSubtareas(tareaId: string): Promise<Subtarea[]> {
+  const { data, error } = await supabase
+    .from('subtareas').select('*').eq('tarea_id', tareaId).order('created_at', { ascending: true })
+  if (error) { console.error('Error fetching subtareas:', error); return [] }
+  return (data || []).map(mapSubtarea)
+}
+
+export async function addSubtarea(tareaId: string, titulo: string): Promise<Subtarea> {
+  const { data, error } = await supabase.from('subtareas').insert({
+    tarea_id: tareaId,
+    titulo: titulo.trim(),
+    completada: false,
+  }).select().single()
+  if (error) throw error
+  return mapSubtarea(data)
+}
+
+export async function updateSubtarea(id: string, updates: Partial<Pick<Subtarea, 'titulo' | 'completada'>>): Promise<void> {
+  const mapped: any = {}
+  if (updates.titulo !== undefined) mapped.titulo = updates.titulo
+  if (updates.completada !== undefined) mapped.completada = updates.completada
+  const { error } = await supabase.from('subtareas').update(mapped).eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteSubtarea(id: string): Promise<void> {
+  const { error } = await supabase.from('subtareas').delete().eq('id', id)
   if (error) throw error
 }
 
@@ -680,6 +759,7 @@ export async function getTareasByUsuario(nombreUsuario: string): Promise<Tarea[]
 
   const tareaIds = (tareasData || []).map(t => t.id)
   let evidenciasMap: Record<string, Evidencia[]> = {}
+  let subtareasMap: Record<string, Subtarea[]> = {}
 
   if (tareaIds.length > 0) {
     const { data: eviData } = await supabase
@@ -691,9 +771,18 @@ export async function getTareasByUsuario(nombreUsuario: string): Promise<Tarea[]
         evidenciasMap[row.tarea_id].push(evi)
       }
     }
+    const { data: subData } = await supabase
+      .from('subtareas').select('*').in('tarea_id', tareaIds).order('created_at', { ascending: true })
+    if (subData) {
+      for (const row of subData) {
+        const sub = mapSubtarea(row)
+        if (!subtareasMap[row.tarea_id]) subtareasMap[row.tarea_id] = []
+        subtareasMap[row.tarea_id].push(sub)
+      }
+    }
   }
 
-  return (tareasData || []).map(row => mapTarea(row, evidenciasMap[row.id] || []))
+  return (tareasData || []).map(row => mapTarea(row, evidenciasMap[row.id] || [], subtareasMap[row.id] || []))
 }
 
 export async function getProyectosByUsuario(nombreUsuario: string): Promise<Proyecto[]> {
@@ -1111,6 +1200,7 @@ export interface Creador {
   id: string
   nombre: string
   email: string
+  tipo: "Freelancer" | "Medición de Contenido" | string
   especialidad: string
   tarifa: string
   estado: string
@@ -1137,6 +1227,7 @@ export async function getCreadores(): Promise<Creador[]> {
     id: r.id,
     nombre: r.nombre,
     email: r.email || '',
+    tipo: r.tipo || 'Freelancer',
     especialidad: r.especialidad || '',
     tarifa: r.tarifa || '',
     estado: r.estado || 'Disponible',
@@ -1148,12 +1239,13 @@ export async function addCreador(c: Omit<Creador, 'id' | 'createdAt'>): Promise<
   const { data, error } = await supabase.from('creadores').insert({
     nombre: c.nombre,
     email: c.email,
+    tipo: c.tipo || 'Freelancer',
     especialidad: c.especialidad,
     tarifa: c.tarifa,
     estado: c.estado,
   }).select().single()
   if (error) throw error
-  return { id: data.id, nombre: data.nombre, email: data.email || '', especialidad: data.especialidad || '', tarifa: data.tarifa || '', estado: data.estado || 'Disponible', createdAt: data.created_at }
+  return { id: data.id, nombre: data.nombre, email: data.email || '', tipo: data.tipo || 'Freelancer', especialidad: data.especialidad || '', tarifa: data.tarifa || '', estado: data.estado || 'Disponible', createdAt: data.created_at }
 }
 
 export async function deleteCreador(id: string): Promise<void> {
@@ -1382,5 +1474,110 @@ export async function updateNominaEmpleado(id: string, updates: {
   if (updates.estado !== undefined) payload.estado_nomina = updates.estado
   if (updates.fechaPago !== undefined) payload.fecha_pago = updates.fechaPago
   const { error } = await supabase.from('usuarios').update(payload).eq('id', id)
+  if (error) throw error
+}
+
+// =============================================
+// VIDEOLLAMADAS
+// =============================================
+
+export interface Videollamada {
+  id: string
+  nombre: string
+  tipo: "Interna" | "Con Cliente"
+  roomId: string
+  descripcion: string
+  proyectoNombre?: string
+  clienteNombre?: string
+  creadoPor: string
+  participantes: string[]
+  activa: boolean
+  createdAt: string
+}
+
+function mapVideollamada(row: any, participantes: string[] = []): Videollamada {
+  return {
+    id: row.id,
+    nombre: row.nombre,
+    tipo: row.tipo || 'Interna',
+    roomId: row.room_id,
+    descripcion: row.descripcion || '',
+    proyectoNombre: row.proyecto_nombre || undefined,
+    clienteNombre: row.cliente_nombre || undefined,
+    creadoPor: row.creado_por,
+    participantes,
+    activa: row.activa,
+    createdAt: row.created_at,
+  }
+}
+
+export async function getVideollamadas(): Promise<Videollamada[]> {
+  const { data, error } = await supabase
+    .from('videollamadas')
+    .select('*')
+    .eq('activa', true)
+    .order('created_at', { ascending: false })
+  if (error) { console.error('Error fetching videollamadas:', error); return [] }
+
+  const ids = (data || []).map(r => r.id)
+  let participantesMap: Record<string, string[]> = {}
+
+  if (ids.length > 0) {
+    const { data: pData } = await supabase
+      .from('videollamada_participantes')
+      .select('*')
+      .in('videollamada_id', ids)
+    if (pData) {
+      for (const row of pData) {
+        if (!participantesMap[row.videollamada_id]) participantesMap[row.videollamada_id] = []
+        participantesMap[row.videollamada_id].push(row.usuario_nombre)
+      }
+    }
+  }
+
+  return (data || []).map(row => mapVideollamada(row, participantesMap[row.id] || []))
+}
+
+export async function createVideollamada(sala: {
+  nombre: string
+  tipo: "Interna" | "Con Cliente"
+  descripcion: string
+  proyectoNombre?: string
+  clienteNombre?: string
+  creadoPor: string
+  participantes: string[]
+}): Promise<Videollamada> {
+  // Generar roomId único basado en nombre y timestamp
+  const slug = sala.nombre
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+  const roomId = `crmcm-${slug}-${Date.now().toString(36)}`
+
+  const { data, error } = await supabase.from('videollamadas').insert({
+    nombre: sala.nombre,
+    tipo: sala.tipo,
+    room_id: roomId,
+    descripcion: sala.descripcion,
+    proyecto_nombre: sala.proyectoNombre || null,
+    cliente_nombre: sala.clienteNombre || null,
+    creado_por: sala.creadoPor,
+  }).select().single()
+  if (error) throw error
+
+  if (sala.participantes.length > 0) {
+    const rows = sala.participantes.map(p => ({
+      videollamada_id: data.id,
+      usuario_nombre: p,
+    }))
+    await supabase.from('videollamada_participantes').insert(rows)
+  }
+
+  return mapVideollamada(data, sala.participantes)
+}
+
+export async function deleteVideollamada(id: string): Promise<void> {
+  const { error } = await supabase.from('videollamadas').update({ activa: false }).eq('id', id)
   if (error) throw error
 }

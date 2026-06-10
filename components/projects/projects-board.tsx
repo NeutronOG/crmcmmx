@@ -4,15 +4,19 @@ import { useCallback } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Building2, Calendar, DollarSign, MoreVertical } from "lucide-react"
+import { Building2, Calendar, DollarSign, MoreVertical, HardDrive, Video } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { usePipelineDrag } from "@/hooks/use-pipeline-drag"
 import type { Proyecto } from "@/lib/store"
 
 const stages = [
+  { id: "Brief", label: "Brief", color: "bg-slate-500" },
+  { id: "Propuesta", label: "Propuesta", color: "bg-violet-500" },
   { id: "Planificación", label: "Planificación", color: "satin-blue-solid" },
+  { id: "Revisión Interna", label: "Rev. Interna", color: "bg-orange-500" },
+  { id: "Revisión Cliente", label: "Rev. Cliente", color: "bg-amber-500" },
   { id: "En Progreso", label: "En Progreso", color: "satin-purple-solid" },
-  { id: "En Revisión", label: "Revisión", color: "satin-yellow-solid" },
+  { id: "En Revisión", label: "Revisión Final", color: "satin-yellow-solid" },
   { id: "Completado", label: "Completados", color: "satin-green-bg" },
   { id: "Pausado", label: "Pausados", color: "satin-red-solid" },
 ]
@@ -57,7 +61,7 @@ export function ProjectsBoard({ proyectos, loading, onCambiarEstado, onEliminar 
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 overflow-x-auto pb-4">
       {stages.map((stage) => (
         <div
           key={stage.id}
@@ -145,6 +149,34 @@ export function ProjectsBoard({ proyectos, loading, onCambiarEstado, onEliminar 
 
                   {p.tipo && (
                     <Badge variant="outline" className="rounded-full text-xs">{p.tipo}</Badge>
+                  )}
+
+                  {/* Botones Drive y Videollamada */}
+                  {(p.driveUrl || p.videollamadaUrl) && (
+                    <div className="flex gap-2 pt-1 border-t border-white/10">
+                      {p.driveUrl && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 flex-1 gap-1 text-xs"
+                          onClick={e => { e.stopPropagation(); window.open(p.driveUrl, '_blank') }}
+                        >
+                          <HardDrive className="h-3 w-3" />
+                          Drive
+                        </Button>
+                      )}
+                      {p.videollamadaUrl && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 flex-1 gap-1 text-xs"
+                          onClick={e => { e.stopPropagation(); window.open(p.videollamadaUrl, '_blank') }}
+                        >
+                          <Video className="h-3 w-3" />
+                          Meet
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </Card>
               </div>
