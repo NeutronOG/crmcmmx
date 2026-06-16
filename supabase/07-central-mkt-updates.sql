@@ -17,6 +17,7 @@ ALTER TABLE proyectos
   ADD CONSTRAINT proyectos_estado_check
   CHECK (estado IN (
     'Brief',
+    'Cotización',
     'Propuesta',
     'Planificación',
     'Revisión Interna',

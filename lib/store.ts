@@ -43,7 +43,7 @@ export interface Proyecto {
   nombre: string
   cliente: string
   tipo: string
-  estado: "Brief" | "Propuesta" | "Planificación" | "Revisión Interna" | "Revisión Cliente" | "En Progreso" | "En Revisión" | "Completado" | "Pausado"
+  estado: "Brief" | "Cotización" | "Propuesta" | "Planificación" | "Revisión Interna" | "Revisión Cliente" | "En Progreso" | "En Revisión" | "Completado" | "Pausado"
   fechaInicio: string
   fechaEntrega: string
   presupuesto: number

@@ -115,6 +115,7 @@ export default function ProjectsPage() {
             loading={loading}
             onCambiarEstado={handleCambiarEstado}
             onEliminar={handleEliminar}
+            onReload={loadProyectos}
           />
         </main>
       </div>

@@ -6,17 +6,31 @@ import { supabase } from './supabase'
 export type Rol =
   | "admin"
   | "dueno"
-  | "ejecutivo_cuenta"
-  | "coord_diseno"
+  // --- Dirección / Cuentas ---
+  | "director_cuentas"
+  | "coord_cuentas"
+  | "admon_finanzas"
+  | "legal"
+  // --- Marketing ---
   | "coord_mkt"
   | "aux_mkt"
-  | "contabilidad"
-  | "ia"
+  | "practicante_mkt"
+  | "ejecutivo_cuenta"
+  // --- Producción Audiovisual ---
+  | "dir_produccion"
+  | "produccion_audiovisual"
+  | "produccion_activaciones"
+  // --- Creativa Cédula 1 ---
+  | "dir_creativa_1"
   | "disenador"
   | "diseñador_grafico"
   | "diseñador_industrial"
-  | "produccion_audiovisual"
-  | "produccion_activaciones"
+  // --- Creativa Cédula 2 ---
+  | "dir_creativa_2"
+  // --- Otros ---
+  | "coord_diseno"
+  | "contabilidad"
+  | "ia"
   | "marketing_digital"
   | "auxiliar_marketing"
   | "creador_contenido"
@@ -37,18 +51,26 @@ export interface Usuario {
 
 export const rolesLabels: Record<Rol, string> = {
   admin: "Administrador",
-  dueno: "Dueño",
-  ejecutivo_cuenta: "Ejecutivo de Cuenta",
-  coord_diseno: "Coordinador de Diseño",
-  coord_mkt: "Coordinador de Marketing",
+  dueno: "Director General",
+  director_cuentas: "Director de Cuentas",
+  coord_cuentas: "Coordinadora de Cuentas",
+  admon_finanzas: "Admon y Finanzas",
+  legal: "Legal",
+  coord_mkt: "Coordinadora de Marketing",
   aux_mkt: "Auxiliar de Marketing",
-  contabilidad: "Contabilidad",
-  ia: "IA",
+  practicante_mkt: "Practicante de Marketing",
+  ejecutivo_cuenta: "Ejecutivo de Cuenta",
+  dir_produccion: "Directora de Producción Audiovisual",
+  produccion_audiovisual: "Producción Audiovisual",
+  produccion_activaciones: "Producción de Activaciones",
+  dir_creativa_1: "Directora Creativa Cédula 1",
   disenador: "Diseñador",
   diseñador_grafico: "Diseñador Gráfico",
   diseñador_industrial: "Diseñador Industrial",
-  produccion_audiovisual: "Producción Audiovisual",
-  produccion_activaciones: "Producción de Activaciones",
+  dir_creativa_2: "Directora Creativa Cédula 2",
+  coord_diseno: "Coordinador de Diseño",
+  contabilidad: "Contabilidad",
+  ia: "IA",
   marketing_digital: "Marketing Digital",
   auxiliar_marketing: "Auxiliar de Marketing",
   creador_contenido: "Creador de Contenido",
@@ -114,11 +136,69 @@ export const permisosPorRol: Record<Rol, Seccion[]> = {
     "idea_room", "calendario", "mi_empresa", "videollamadas",
     "drive", "metricool",
   ],
+  // Guillermo — ve todo incluyendo carga global
   dueno: [
     "dashboard", "reportes", "facturacion", "nomina",
     "clientes", "proyectos", "cotizaciones", "leads",
+    "responsables", "tareas",
     "mi_empresa", "calendario", "idea_room", "videollamadas",
     "drive", "metricool",
+  ],
+  // Felipe — Director de Cuentas — ve carga global
+  director_cuentas: [
+    "dashboard", "leads", "clientes", "proyectos", "cotizaciones",
+    "nuevo_negocio", "tareas", "responsables",
+    "calendario", "comunicaciones", "idea_room", "videollamadas",
+    "drive", "metricool",
+  ],
+  // Móni — Coordinadora de Cuentas — ve carga global
+  coord_cuentas: [
+    "dashboard", "leads", "clientes", "proyectos", "cotizaciones",
+    "nuevo_negocio", "tareas", "responsables",
+    "calendario", "comunicaciones", "idea_room", "videollamadas",
+    "drive", "metricool",
+  ],
+  // Ian — Admon y Finanzas — solo ve su panel
+  admon_finanzas: [
+    "dashboard", "facturacion", "nomina", "reportes", "clientes", "calendario", "videollamadas",
+  ],
+  // Alexis — Legal — solo ve su panel
+  legal: [
+    "dashboard", "clientes", "proyectos", "calendario", "videollamadas",
+  ],
+  // Paloma Rivera — Coord Marketing — ve solo su equipo de marketing
+  coord_mkt: [
+    "dashboard", "leads", "clientes", "proyectos", "tareas",
+    "cotizaciones", "nuevo_negocio", "responsables",
+    "calendario", "comunicaciones", "idea_room", "creadores", "videollamadas",
+    "drive", "metricool",
+  ],
+  // Lesly — Auxiliar de Marketing
+  aux_mkt: [
+    "dashboard", "tareas", "proyectos", "calendario", "comunicaciones", "idea_room", "videollamadas",
+    "drive", "metricool",
+  ],
+  // Emiliano, Jorge, Allison — Practicantes de Marketing
+  practicante_mkt: [
+    "mi_panel", "tareas", "calendario",
+  ],
+  // Estefanía — Directora Producción Audiovisual — ve su equipo
+  dir_produccion: [
+    "dashboard", "proyectos", "tareas", "clientes",
+    "responsables", "calendario", "idea_room", "comunicaciones", "videollamadas",
+    "drive",
+  ],
+  // Paloma Pliego — Directora Creativa Cédula 1 — ve su equipo (Vicente, Clarissa)
+  dir_creativa_1: [
+    "dashboard", "proyectos", "tareas", "clientes",
+    "responsables", "calendario", "idea_room", "comunicaciones", "videollamadas",
+    "drive",
+  ],
+  // Dalet — Directora Creativa Cédula 2 — ve su equipo (Ana Paola, Ana Luisa, Daniel)
+  dir_creativa_2: [
+    "dashboard", "proyectos", "tareas", "clientes",
+    "responsables", "calendario", "idea_room", "comunicaciones", "videollamadas",
+    "drive",
   ],
   ejecutivo_cuenta: [
     "dashboard", "leads", "clientes", "proyectos", "cotizaciones",
@@ -130,59 +210,71 @@ export const permisosPorRol: Record<Rol, Seccion[]> = {
     "calendario", "idea_room", "comunicaciones", "videollamadas",
     "drive", "metricool",
   ],
-  coord_mkt: [
-    "dashboard", "leads", "clientes", "proyectos", "tareas",
-    "cotizaciones", "nuevo_negocio", "calendario", "comunicaciones", "idea_room", "creadores", "videollamadas",
-    "drive", "metricool",
-  ],
-  aux_mkt: [
-    "dashboard", "tareas", "proyectos", "calendario", "comunicaciones", "idea_room", "videollamadas",
-    "drive", "metricool",
-  ],
   contabilidad: [
     "dashboard", "facturacion", "nomina", "reportes", "clientes", "calendario", "videollamadas",
   ],
   ia: [
     "dashboard", "tareas", "proyectos", "idea_room", "calendario", "videollamadas",
   ],
+  produccion_audiovisual: ["mi_panel", "tareas", "calendario"],
+  produccion_activaciones: ["mi_panel", "tareas", "calendario"],
   disenador: ["mi_panel", "tareas", "calendario"],
-  diseñador_grafico: [
-    "mi_panel",
-  ],
-  diseñador_industrial: [
-    "mi_panel",
-  ],
-  produccion_audiovisual: [
-    "mi_panel",
-  ],
-  produccion_activaciones: [
-    "mi_panel",
-  ],
-  marketing_digital: [
-    "mi_panel",
-  ],
-  auxiliar_marketing: [
-    "mi_panel",
-  ],
-  creador_contenido: [
-    "mi_panel",
-  ],
-  creador_parrilla: [
-    "mi_panel",
-  ],
+  diseñador_grafico: ["mi_panel", "tareas", "calendario"],
+  diseñador_industrial: ["mi_panel", "tareas", "calendario"],
+  marketing_digital: ["mi_panel"],
+  auxiliar_marketing: ["mi_panel"],
+  creador_contenido: ["mi_panel"],
+  creador_parrilla: ["mi_panel"],
   administracion: [
     "dashboard", "clientes", "proyectos", "responsables",
     "calendario", "idea_room", "reportes", "leads", "mi_empresa", "videollamadas",
   ],
-  tareas: [
-    "mi_panel",
-  ],
-  influencer: [
-    "mi_panel",
-  ],
-  freelancer: [
-    "mi_panel",
-  ],
+  tareas: ["mi_panel"],
+  influencer: ["mi_panel"],
+  freelancer: ["mi_panel"],
+}
+
+// =============================================
+// VISIBILIDAD DE CARGA LABORAL POR ROL
+// =============================================
+
+// Roles que pueden ver la carga de TODO el equipo (Guillermo, Felipe, Móni + admin)
+export const ROLES_CARGA_GLOBAL: Rol[] = ["admin", "dueno", "director_cuentas", "coord_cuentas"]
+
+// Equipos por director — mapea rol → nombres exactos en Supabase de su área
+export const equipoPorRol: Partial<Record<Rol, string[]>> = {
+  // Paloma Rivera — Coordinadora de Marketing: Lesly, Emiliano, Jorge, Allison + Estefanía (Producción)
+  coord_mkt: ["Lesly", "Emiliano", "Jorge", "Allison", "Estefanía"],
+  // Estefanía — Dir. Producción Audiovisual: ve su propio equipo si tuviera subordinados
+  dir_produccion: [],  // Si Estefanía tuviera gente a su cargo, agregar aquí
+  // Paloma Pliego — Dir. Creativa Cédula 1: Vicente, Clarissa
+  dir_creativa_1: ["Vicente", "Clarissa"],
+  // Dalet — Dir. Creativa Cédula 2: Ana Paola, Ana Luisa, Daniel
+  dir_creativa_2: ["Ana Paola", "Ana Luisa", "Daniel"],
+}
+
+/**
+ * Devuelve true si el rol puede ver la carga laboral completa de todo el equipo.
+ */
+export function puedeVerCargaGlobal(rol: Rol): boolean {
+  return ROLES_CARGA_GLOBAL.includes(rol)
+}
+
+/**
+ * Devuelve los nombres de los miembros del equipo que un rol puede ver en carga laboral.
+ * Si el rol tiene acceso global, devuelve null (significa: mostrar todos).
+ * Si el rol tiene equipo propio definido, devuelve esos nombres.
+ * Si no tiene equipo, devuelve array vacío (solo se ve a sí mismo).
+ */
+export function getEquipoVisible(rol: Rol, nombrePropio: string): string[] | null {
+  if (puedeVerCargaGlobal(rol)) return null // null = todos
+  const equipo = equipoPorRol[rol]
+  if (equipo !== undefined) {
+    // Directores de área ven su equipo (sin incluirse a sí mismos en la lista de subordinados)
+    return equipo
+  }
+  // Cualquier otro rol solo se ve a sí mismo
+  return [nombrePropio]
 }
 
 // Mapa de sección a ruta

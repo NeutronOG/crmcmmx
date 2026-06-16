@@ -38,10 +38,10 @@ export function ResponsablesList() {
         const misProyectos = proyectos.filter(p => p.responsable === u.nombre && p.estado !== "Completado").length
         const misTareasComp = tareas.filter(t => t.asignado === u.nombre && t.estado === "Completada").length
         const misTareasPend = tareas.filter(t => t.asignado === u.nombre && t.estado !== "Completada").length
-        const total = misTareasComp + misTareasPend
-        const carga = total > 0 ? Math.min(100, Math.round((misTareasPend / Math.max(total, 1)) * 100)) : 0
-        const estado = carga > 80 ? "Sobrecargado" : carga > 50 ? "Ocupado" : "Disponible"
-        const estadoColor = carga > 80 ? "satin-red-bg satin-red" : carga > 50 ? "satin-yellow-bg satin-yellow" : "satin-green-bg satin-green"
+        // Carga basada en proyectos activos: >= 6 = sobrecargado, 4-5 = ocupado, < 4 = disponible
+        const carga = Math.min(100, Math.round((misProyectos / 6) * 100))
+        const estado = misProyectos >= 6 ? "Sobrecargado" : misProyectos >= 4 ? "Ocupado" : "Disponible"
+        const estadoColor = misProyectos >= 6 ? "satin-red-bg satin-red" : misProyectos >= 4 ? "satin-yellow-bg satin-yellow" : "satin-green-bg satin-green"
         return {
           id: u.id,
           nombre: u.nombre,
@@ -124,17 +124,17 @@ export function ResponsablesList() {
                 </div>
 
                 <div className="hidden xl:flex flex-col items-center gap-1">
-                  <div className="text-xs text-muted-foreground">Carga</div>
+                  <div className="text-xs text-muted-foreground">Carga (proy)</div>
                   <div className="w-20 h-2 bg-white/10 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        responsable.cargaTrabajo > 80 ? 'satin-red-solid' :
-                        responsable.cargaTrabajo > 60 ? 'satin-yellow-solid' : 'satin-green-bg'
+                        responsable.proyectosActivos >= 6 ? 'satin-red-solid' :
+                        responsable.proyectosActivos >= 4 ? 'satin-yellow-solid' : 'satin-green-bg'
                       }`}
-                      style={{ width: `${responsable.cargaTrabajo}%` }}
+                      style={{ width: `${Math.min(100, (responsable.proyectosActivos / 6) * 100)}%` }}
                     />
                   </div>
-                  <div className="text-xs font-medium">{responsable.cargaTrabajo}%</div>
+                  <div className="text-xs font-medium">{responsable.proyectosActivos}/6</div>
                 </div>
 
                 <Badge className={responsable.estadoColor}>

@@ -1,16 +1,18 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Building2, Calendar, DollarSign, MoreVertical, HardDrive, Video } from "lucide-react"
+import { Building2, Calendar, DollarSign, MoreVertical, HardDrive, Video, Eye } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { usePipelineDrag } from "@/hooks/use-pipeline-drag"
 import type { Proyecto } from "@/lib/store"
+import { DetalleProyectoDialog } from "./detalle-proyecto-dialog"
 
 const stages = [
   { id: "Brief", label: "Brief", color: "bg-slate-500" },
+  { id: "Cotización", label: "Cotización", color: "bg-cyan-500" },
   { id: "Propuesta", label: "Propuesta", color: "bg-violet-500" },
   { id: "Planificación", label: "Planificación", color: "satin-blue-solid" },
   { id: "Revisión Interna", label: "Rev. Interna", color: "bg-orange-500" },
@@ -26,9 +28,13 @@ interface ProjectsBoardProps {
   loading?: boolean
   onCambiarEstado: (id: string, estado: Proyecto["estado"]) => void
   onEliminar: (id: string) => void
+  onReload?: () => void
 }
 
-export function ProjectsBoard({ proyectos, loading, onCambiarEstado, onEliminar }: ProjectsBoardProps) {
+export function ProjectsBoard({ proyectos, loading, onCambiarEstado, onEliminar, onReload }: ProjectsBoardProps) {
+  const [selectedProyecto, setSelectedProyecto] = useState<Proyecto | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+
   const handleChangeStage = useCallback((id: string, stage: string) => {
     onCambiarEstado(id, stage as Proyecto["estado"])
   }, [onCambiarEstado])
@@ -99,7 +105,10 @@ export function ProjectsBoard({ proyectos, loading, onCambiarEstado, onEliminar 
                   draggingId === p.id ? "opacity-40 scale-95" : ""
                 }`}
               >
-                <Card className="glass-card p-4 rounded-xl space-y-3 hover:scale-[1.02] transition-all duration-300 group">
+                <Card
+                  className="glass-card p-4 rounded-xl space-y-3 hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
+                  onClick={() => { setSelectedProyecto(p); setDialogOpen(true) }}
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-sm group-hover:text-primary transition-colors truncate">{p.nombre}</h4>
@@ -112,7 +121,10 @@ export function ProjectsBoard({ proyectos, loading, onCambiarEstado, onEliminar 
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreVertical className="h-4 w-4" /></Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="">
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => { setSelectedProyecto(p); setDialogOpen(true) }}>
+                          <Eye className="w-3.5 h-3.5 mr-2" /> Ver detalles
+                        </DropdownMenuItem>
                         {p.estado !== "En Progreso" && <DropdownMenuItem onClick={() => onCambiarEstado(p.id, "En Progreso")}>Mover a En Progreso</DropdownMenuItem>}
                         {p.estado !== "En Revisión" && <DropdownMenuItem onClick={() => onCambiarEstado(p.id, "En Revisión")}>Mover a Revisión</DropdownMenuItem>}
                         {p.estado !== "Completado" && <DropdownMenuItem onClick={() => onCambiarEstado(p.id, "Completado")}>Marcar Completado</DropdownMenuItem>}
@@ -193,6 +205,13 @@ export function ProjectsBoard({ proyectos, loading, onCambiarEstado, onEliminar 
           </div>
         </div>
       ))}
+
+      <DetalleProyectoDialog
+        proyecto={selectedProyecto}
+        open={dialogOpen}
+        onOpenChange={(v) => { if (!v) setSelectedProyecto(null); setDialogOpen(v) }}
+        onUpdated={() => onReload?.()}
+      />
     </div>
   )
 }

@@ -7,7 +7,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Users, Briefcase, CheckCircle, Clock } from "lucide-react"
 import { getProyectos, getTareas } from "@/lib/store"
-import { getUsuarios, rolesLabels } from "@/lib/auth"
+import { getUsuarios, rolesLabels, getEquipoVisible } from "@/lib/auth"
+import { useAuth } from "@/components/auth-provider"
 
 type AsignacionData = {
   responsable: string
@@ -17,12 +18,25 @@ type AsignacionData = {
 }
 
 export function ResponsablesAsignaciones() {
+  const { usuario } = useAuth()
   const [asignaciones, setAsignaciones] = useState<AsignacionData[]>([])
   const [loading, setLoading] = useState(true)
+  const [esVistaParcial, setEsVistaParcial] = useState(false)
 
   useEffect(() => {
     Promise.all([getUsuarios(), getProyectos(), getTareas()]).then(([users, proyectos, tareas]) => {
-      const data = users.filter(u => u.rol !== "admin").map(u => {
+      let usuariosFiltrados = users.filter(u => u.rol !== "admin")
+      if (usuario) {
+        const equipoVisible = getEquipoVisible(usuario.rol, usuario.nombre)
+        if (equipoVisible !== null) {
+          const nombres = new Set(equipoVisible)
+          usuariosFiltrados = usuariosFiltrados.filter(u => nombres.has(u.nombre))
+          setEsVistaParcial(true)
+        } else {
+          setEsVistaParcial(false)
+        }
+      }
+      const data = usuariosFiltrados.map(u => {
         const misProyectos = proyectos.filter(p => p.responsable === u.nombre).map(p => ({
           nombre: p.nombre,
           progreso: p.progreso,
@@ -41,13 +55,25 @@ export function ResponsablesAsignaciones() {
       setAsignaciones(data)
       setLoading(false)
     })
-  }, [])
+  }, [usuario])
 
   if (loading) {
     return <div className="text-center py-8"><div className="animate-pulse text-muted-foreground">Cargando asignaciones...</div></div>
   }
 
   return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <Users className="h-5 w-5 text-primary" />
+          Asignaciones por Responsable
+        </h3>
+        {esVistaParcial && usuario && (
+          <Badge variant="outline" className="text-xs font-normal">
+            {rolesLabels[usuario.rol] ?? usuario.rol} — solo tu área
+          </Badge>
+        )}
+      </div>
     <div className="grid gap-6 lg:grid-cols-2">
       {asignaciones.map((asignacion) => (
         <Card key={asignacion.responsable} className="glass border-white/10">
@@ -109,6 +135,7 @@ export function ResponsablesAsignaciones() {
           </CardContent>
         </Card>
       ))}
+    </div>
     </div>
   )
 }

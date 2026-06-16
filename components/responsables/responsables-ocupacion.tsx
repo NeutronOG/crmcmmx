@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { CalendarDays, Calendar } from "lucide-react"
 import { getTareas } from "@/lib/store"
-import { getUsuarios } from "@/lib/auth"
+import { getUsuarios, getEquipoVisible, rolesLabels } from "@/lib/auth"
+import { useAuth } from "@/components/auth-provider"
 import type { Tarea } from "@/lib/store"
 
 type VistaOcupacion = "diaria" | "semanal"
@@ -36,19 +37,34 @@ function getHoy(): string {
 }
 
 export function ResponsablesOcupacion() {
+  const { usuario } = useAuth()
   const [vista, setVista] = useState<VistaOcupacion>("semanal")
   const [loading, setLoading] = useState(true)
   const [datos, setDatos] = useState<
     { nombre: string; rol: string; diasData: DiaData[]; tareasHoy: Tarea[] }[]
   >([])
+  const [esVistaParcial, setEsVistaParcial] = useState(false)
 
   useEffect(() => {
     Promise.all([getUsuarios(), getTareas()]).then(([users, tareas]) => {
       const hoy = getHoy()
       const diasBase = getDiasSemana()
 
-      const data = users
-        .filter(u => u.rol !== "admin")
+      // Filtrar usuarios según la visibilidad del usuario logueado
+      let usuariosFiltrados = users.filter(u => u.rol !== "admin")
+      if (usuario) {
+        const equipoVisible = getEquipoVisible(usuario.rol, usuario.nombre)
+        if (equipoVisible !== null) {
+          // Vista parcial: solo su equipo
+          const nombres = new Set(equipoVisible)
+          usuariosFiltrados = usuariosFiltrados.filter(u => nombres.has(u.nombre))
+          setEsVistaParcial(true)
+        } else {
+          setEsVistaParcial(false)
+        }
+      }
+
+      const data = usuariosFiltrados
         .map(u => {
           const misTareas = tareas.filter(t => t.asignado === u.nombre && t.estado !== "Completada")
 
@@ -84,9 +100,14 @@ export function ResponsablesOcupacion() {
     <Card className="glass border-white/10">
       <CardHeader>
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 flex-wrap">
             <CalendarDays className="h-5 w-5 text-primary" />
             Ocupación del Equipo
+            {esVistaParcial && usuario && (
+              <Badge variant="outline" className="text-xs font-normal ml-1">
+                {rolesLabels[usuario.rol] ?? usuario.rol} — solo tu área
+              </Badge>
+            )}
           </CardTitle>
           <div className="flex gap-2">
             <Button

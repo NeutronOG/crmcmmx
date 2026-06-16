@@ -34,7 +34,7 @@ export function NuevoProyectoDialog({ open, onOpenChange, onCreated }: NuevoProy
   const [nombre, setNombre] = useState("")
   const [cliente, setCliente] = useState("")
   const [tipo, setTipo] = useState("Marketing Digital")
-  const [estado, setEstado] = useState<"Brief" | "Propuesta" | "Planificación" | "En Progreso">("Brief")
+  const [estado, setEstado] = useState<"Brief" | "Cotización" | "Propuesta" | "Planificación" | "En Progreso">("Brief")
   const [fechaInicio, setFechaInicio] = useState("")
   const [fechaEntrega, setFechaEntrega] = useState("")
   const [presupuesto, setPresupuesto] = useState("")
@@ -152,6 +152,7 @@ export function NuevoProyectoDialog({ open, onOpenChange, onCreated }: NuevoProy
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Brief">Brief</SelectItem>
+                  <SelectItem value="Cotización">Cotización</SelectItem>
                   <SelectItem value="Propuesta">Propuesta</SelectItem>
                   <SelectItem value="Planificación">Planificación</SelectItem>
                   <SelectItem value="En Progreso">En Progreso</SelectItem>
