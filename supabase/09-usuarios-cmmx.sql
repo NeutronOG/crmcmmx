@@ -59,10 +59,8 @@ INSERT INTO usuarios (nombre, email, rol)
 SELECT 'Lesly', 'lesly@cmmx.mx', 'aux_mkt'
 WHERE NOT EXISTS (SELECT 1 FROM usuarios WHERE nombre ILIKE '%lesly%' OR email ILIKE '%lesly%');
 
--- Estefanía (Directora de Producción Audiovisual)
-INSERT INTO usuarios (nombre, email, rol)
-SELECT 'Estefanía', 'estefania@cmmx.mx', 'dir_produccion'
-WHERE NOT EXISTS (SELECT 1 FROM usuarios WHERE nombre ILIKE '%estefan%');
+-- NOTA: Fani Ramos es la Directora de Producción Audiovisual
+-- No se crea usuario separado "Estefanía"; se usa fani.ramos@cmmx.mx
 
 -- Emiliano (Practicante de Marketing)
 INSERT INTO usuarios (nombre, email, rol)

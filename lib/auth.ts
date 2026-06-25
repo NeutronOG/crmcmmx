@@ -243,10 +243,10 @@ export const ROLES_CARGA_GLOBAL: Rol[] = ["admin", "dueno", "director_cuentas", 
 
 // Equipos por director — mapea rol → nombres exactos en Supabase de su área
 export const equipoPorRol: Partial<Record<Rol, string[]>> = {
-  // Paloma Rivera — Coordinadora de Marketing: Lesly, Emiliano, Jorge, Allison + Estefanía (Producción)
-  coord_mkt: ["Lesly", "Emiliano", "Jorge", "Allison", "Estefanía"],
-  // Estefanía — Dir. Producción Audiovisual: ve su propio equipo si tuviera subordinados
-  dir_produccion: [],  // Si Estefanía tuviera gente a su cargo, agregar aquí
+  // Paloma Rivera — Coordinadora de Marketing: Lesly, Emiliano, Jorge, Allison + Fani Ramos (Producción)
+  coord_mkt: ["Lesly", "Emiliano", "Jorge", "Allison", "Fani Ramos"],
+  // Fani Ramos — Dir. Producción Audiovisual: ve su propio equipo si tuviera subordinados
+  dir_produccion: [],  // Si Fani Ramos tuviera gente a su cargo, agregar aquí
   // Paloma Pliego — Dir. Creativa Cédula 1: Vicente, Clarissa
   dir_creativa_1: ["Vicente", "Clarissa"],
   // Dalet — Dir. Creativa Cédula 2: Ana Paola, Ana Luisa, Daniel
